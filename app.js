@@ -1,84 +1,30 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+import express from 'express';
+import http from 'http';
+import { WebSocketServer } from 'ws';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import {setupRoutes} from "./src/routes/index.js";
+import {setupWebSocket} from "./src/web-socket/index.js";
 
-var indexRouter = require('./routes');
-var usersRouter = require('./routes/users');
 
-var app = express();
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const http = require('http');
+app.use(express.static(path.join(__dirname, './public')));
 
-const WebSocket = require('ws');
+app.get('/', (req, res) => {
+        res.sendFile(path.join(__dirname, './public', 'index.html'));
+});
 
-var port = process.env.PORT || '3000';
-app.set('port', port);
-var server = http.createServer(app);
+setupRoutes(app);
+setupWebSocket(wss);
 
-const meetChatWebSocketServer = new WebSocket.Server({server});
-
-const channels = new Map();
-
-function joinChannel(channel, ws) {
-  if (!channels.has(channel)) {
-    channels.set(channel, new Set());
-  }
-  channels.get(channel).add(ws);
-}
-
-function leaveChannel(channel, ws) {
-  if (channels.has(channel)) {
-    channels.get(channel).delete(ws);
-    if (channels.get(channel).size === 0) {
-      channels.delete(channel);
-    }
-  }
-}
-
-meetChatWebSocketServer.on('connection', function connection(ws,req) {
-    console.log('EPTA')
-    ws.on('message', (message) => {
-        const data = JSON.parse(message);
-        
-        switch(data.type) {
-            case 'join':
-                joinChannel(data.channel, ws);
-                break;
-            case 'leave':
-                leaveChannel(data.channel, ws);
-                break;
-            case 'message':
-                if (channels.has(data.channel)) {
-                    channels.get(data.channel).forEach((client) => {
-                        if (client !== ws && client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify({
-                                type: 'message',
-                                channel: data.channel,
-                                content: data.content
-                            }));
-                        }
-                    });
-                }
-                break;
-        }
-    });
-
-    ws.on('close', () => {
-        channels.forEach((clients, channel) => {
-            leaveChannel(channel, ws);
-        });
-    });
-})
-
-server.listen(port);
-console.log(`app listed http://localhost:${port}`)
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`app listen :http://localhost:${PORT}/`);
+});
