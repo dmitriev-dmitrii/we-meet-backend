@@ -1,47 +1,98 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <title>Express</title>
-  <link rel="stylesheet" href="/stylesheets/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Чат</title>
+    <style>
+        #chat-container {
+            display: flex;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #channels {
+            width: 200px;
+            padding: 10px;
+        }
+        #messages {
+            flex-grow: 1;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        #input-area {
+            margin-top: 10px;
+        }
+    </style>
 </head>
-
 <body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
+    <div id="chat-container">
+        <div id="channels">
+            <h3>Каналы</h3>
+            <button onclick="joinChannel('general')">Общий</button>
+            <button onclick="joinChannel('random')">Случайный</button>
+            <button onclick="joinChannel('news')">Новости</button>
+        </div>
+        <div>
+            <div id="messages"></div>
+            <div id="input-area">
+                <input type="text" id="message-input" placeholder="Введите сообщение">
+                <button onclick="sendMessage()">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = new WebSocket(`ws://${window.location.host}`);
+        let currentChannel = 'general';
+
+        socket.onopen = () => {
+            joinChannel('general');
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'message') {
+                displayMessage(data.channel, data.content);
+            }
+        };
+
+        function joinChannel(channel) {
+            leaveChannel(currentChannel);
+            currentChannel = channel;
+            socket.send(JSON.stringify({ type: 'join', channel }));
+            displayMessage('system', `Вы присоединились к каналу: ${channel}`);
+        }
+
+        function leaveChannel(channel) {
+            socket.send(JSON.stringify({ type: 'leave', channel }));
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+            if (content) {
+                socket.send(JSON.stringify({ type: 'message', channel: currentChannel, content }));
+                displayMessage(currentChannel, content, true);
+                input.value = '';
+            }
+        }
+
+        function displayMessage(channel, content, isOwnMessage = false) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `[${channel}] ${isOwnMessage ? 'Вы' : 'Кто-то'}: ${content}`;
+            messageElement.style.color = isOwnMessage ? 'blue' : 'black';
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
 </body>
-<script>
-
-  var ws = new WebSocket('ws://' + window.location.host);
-
-  ws.onopen = function(event) {
-    console.log('open event', event)
-    //do something when connection estabilished
-  };
-
-  ws.onmessage = function(event) {
-    console.log('event Message',event)
-
-    messagesList.value.push(JSON.parse(event.data))
-
-    //do something when message arrives
-  };
-
-  ws.onclose = function(event) {
-    console.log('event Close', event)
-
-    //do something when connection close
-  };
-
-  ws.onerror = function(event) {
-    console.log('error event', event)
-
-    //do something when connection close
-  };
-
-
-
-
-
-
-</script>
 </html>
