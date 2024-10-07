@@ -9,5 +9,39 @@
   <h1>Express</h1>
   <p>Welcome to Express</p>
 </body>
+<script>
 
+  var ws = new WebSocket('ws://' + window.location.host);
+
+  ws.onopen = function(event) {
+    console.log('open event', event)
+    //do something when connection estabilished
+  };
+
+  ws.onmessage = function(event) {
+    console.log('event Message',event)
+
+    messagesList.value.push(JSON.parse(event.data))
+
+    //do something when message arrives
+  };
+
+  ws.onclose = function(event) {
+    console.log('event Close', event)
+
+    //do something when connection close
+  };
+
+  ws.onerror = function(event) {
+    console.log('error event', event)
+
+    //do something when connection close
+  };
+
+
+
+
+
+
+</script>
 </html>
