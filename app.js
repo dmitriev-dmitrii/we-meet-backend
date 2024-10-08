@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 setupRoutes(app);
 setupWebSocket(wss);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 7000;
 server.listen(PORT, () => {
     console.log(`app listen :http://localhost:${PORT}/`);
 });

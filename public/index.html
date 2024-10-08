@@ -4,39 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Чат</title>
-    <style>
-        #chat-container {
-            display: flex;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        #channels {
-            width: 200px;
-            padding: 10px;
-        }
-        #messages {
-            flex-grow: 1;
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-        #input-area {
-            margin-top: 10px;
-        }
-    </style>
+
 </head>
 <body>
     <div id="chat-container">
-        <div id="channels">
-            <h3>Каналы</h3>
-            <button onclick="joinChannel('general')">Общий</button>
-            <button onclick="joinChannel('random')">Случайный</button>
-            <button onclick="joinChannel('news')">Новости</button>
-        </div>
         <div>
-            <div id="messages"></div>
-            <div id="input-area">
+            <ul id="messages"></ul>
+            <div id="form">
                 <input type="text" id="message-input" placeholder="Введите сообщение">
                 <button onclick="sendMessage()">Отправить</button>
             </div>
@@ -44,55 +18,60 @@
     </div>
 
     <script>
-        const socket = new WebSocket(`ws://${window.location.host}`);
-        let currentChannel = 'general';
+        const messagesDiv = document.getElementById('messages');
+        const input = document.getElementById('message-input');
+        const  form = document.getElementById('message-input');
 
-        socket.onopen = () => {
-            joinChannel('general');
+
+        const MEET_CHANNELS = {
+            MEET_CHAT_MESSAGES_CHANNEL: 1 ,
+            MEET_USERS_CHANNEL: 2 ,
+        }
+
+        const ws = new WebSocket(`ws://${window.location.host}`);
+        const sendChatMessage = (text)=> {
+
+            const data = {
+                text,
+                userId:'hui1'
+            }
+
+            ws.send(JSON.stringify({ channel: MEET_CHANNELS.MEET_CHAT_MESSAGES_CHANNEL , data }));
+        }
+
+        ws.onopen = () => {
+
         };
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'message') {
-                displayMessage(data.channel, data.content);
+        ws.onmessage = (event) => {
+            const res = JSON.parse(event.data);
+
+            const {channel,data} = res
+
+            if (channel === MEET_CHANNELS.MEET_CHAT_MESSAGES_CHANNEL) {
+                const msg = `channel ${channel} , userID : ${data.userId} , text :  ${data.text} `
+                displayMessage(msg);
             }
         };
-
-        function joinChannel(channel) {
-            leaveChannel(currentChannel);
-            currentChannel = channel;
-            socket.send(JSON.stringify({ type: 'join', channel }));
-            displayMessage('system', `Вы присоединились к каналу: ${channel}`);
-        }
-
-        function leaveChannel(channel) {
-            socket.send(JSON.stringify({ type: 'leave', channel }));
-        }
 
         function sendMessage() {
-            const input = document.getElementById('message-input');
-            const content = input.value.trim();
-            if (content) {
-                socket.send(JSON.stringify({ type: 'message', channel: currentChannel, content }));
-                displayMessage(currentChannel, content, true);
-                input.value = '';
-            }
+            const text = input.value.trim();
+            sendChatMessage(text)
+            input.value = ''
         }
 
-        function displayMessage(channel, content, isOwnMessage = false) {
-            const messagesDiv = document.getElementById('messages');
-            const messageElement = document.createElement('div');
-            messageElement.textContent = `[${channel}] ${isOwnMessage ? 'Вы' : 'Кто-то'}: ${content}`;
-            messageElement.style.color = isOwnMessage ? 'blue' : 'black';
+        function displayMessage(msg = '???') {
+
+            const messageElement = document.createElement('li');
+            messageElement.innerText = msg
             messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        document.getElementById('message-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+        form.addEventListener('submit', function(e) {
+            e.preventDefault()
+            sendMessage();
         });
+
     </script>
 </body>
 </html>
