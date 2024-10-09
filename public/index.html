@@ -7,71 +7,16 @@
 
 </head>
 <body>
-    <div id="chat-container">
-        <div>
-            <ul id="messages"></ul>
-            <div id="form">
-                <input type="text" id="message-input" placeholder="Введите сообщение">
-                <button onclick="sendMessage()">Отправить</button>
-            </div>
-        </div>
-    </div>
 
-    <script>
-        const messagesDiv = document.getElementById('messages');
-        const input = document.getElementById('message-input');
-        const  form = document.getElementById('message-input');
+<input type="text" id="roomId" placeholder="ID комнаты">
+<button id="joinBtn">Присоединиться</button>
+<div id="videos">
+    <video id="localVideo" autoplay muted></video>
+    <video id="remoteVideo" autoplay></video>
+</div>
 
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="client.js"></script>
 
-        const MEET_CHANNELS = {
-            MEET_CHAT_MESSAGES_CHANNEL: 1 ,
-            MEET_USERS_CHANNEL: 2 ,
-        }
-
-        const ws = new WebSocket(`ws://${window.location.host}`);
-        const sendChatMessage = (text)=> {
-
-            const data = {
-                text,
-                userId:'hui1'
-            }
-
-            ws.send(JSON.stringify({ channel: MEET_CHANNELS.MEET_CHAT_MESSAGES_CHANNEL , data }));
-        }
-
-        ws.onopen = () => {
-
-        };
-
-        ws.onmessage = (event) => {
-            const res = JSON.parse(event.data);
-
-            const {channel,data} = res
-
-            if (channel === MEET_CHANNELS.MEET_CHAT_MESSAGES_CHANNEL) {
-                const msg = `channel ${channel} , userID : ${data.userId} , text :  ${data.text} `
-                displayMessage(msg);
-            }
-        };
-
-        function sendMessage() {
-            const text = input.value.trim();
-            sendChatMessage(text)
-            input.value = ''
-        }
-
-        function displayMessage(msg = '???') {
-
-            const messageElement = document.createElement('li');
-            messageElement.innerText = msg
-            messagesDiv.appendChild(messageElement);
-        }
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault()
-            sendMessage();
-        });
-
-    </script>
 </body>
 </html>
