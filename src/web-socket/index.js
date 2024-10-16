@@ -55,8 +55,11 @@ function handleJoin(ws, roomId) {
 }
 
 function broadcastToRoom(sender, roomId, message) {
+
     console.log(`Broadcasting to room ${roomId}:`, message);
+
     if (rooms.has(roomId)) {
+
         rooms.get(roomId).forEach((client) => {
             if (client !== sender && client.readyState === WebSocket.OPEN) {
                 console.log('Sending to client');
