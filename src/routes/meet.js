@@ -1,20 +1,21 @@
 import { Router } from "express";
 
 const meetRouter = Router()
-
+import {meetService} from "../services/meetService.js";
+const {createMeet}=  meetService
 // usersRouter.post('/registration', userRegistration);
 //
 // usersRouter.post('/login',  userLogin );
 //
 // meetRouter.post('/logout',  userLogout);
 //
-// usersRouter.put('/refresh-tokens', updateUserAuthTokens );
 
 
-meetRouter.post('/create',(req, res)=> {
-  const {body} =  req
+meetRouter.post('/create',async ({body}, res)=> {
 
-  res.send('create meet')
+  const meet = await  createMeet()
+
+  res.send(meet)
 })
 
 export  default  meetRouter;
