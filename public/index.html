@@ -8,15 +8,14 @@
 </head>
 <body>
 
-<input type="text" id="roomId" placeholder="ID комнаты">
+<label >ID комнаты <input type="text" id="roomId" placeholder=" введите ID комнаты"></label>
 <button id="joinBtn">Присоединиться</button>
 <div id="videos">
     <video id="localVideo" autoplay muted></video>
     <video id="remoteVideo" autoplay></video>
 </div>
 
-    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
-    <script src="client.js"></script>
+    <script type="module" src="client.js"></script>
 
 </body>
 </html>

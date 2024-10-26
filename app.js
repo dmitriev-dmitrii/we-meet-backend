@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -11,7 +12,6 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 setupRoutes(app);
 setupWebSocket(wss);
 
-const PORT = process.env.PORT || 7000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`app listen :http://localhost:${PORT}/`);
 });

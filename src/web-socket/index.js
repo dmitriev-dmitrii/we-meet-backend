@@ -10,7 +10,6 @@ const  onSocketConnect = (ws , req) => {
     console.log('New client connected');
 
     ws.on('message', (message) => {
-        console.log('Received raw message:', message);
         let data;
         try {
             data = JSON.parse(message);

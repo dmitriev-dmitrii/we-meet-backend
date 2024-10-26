@@ -1,58 +1,13 @@
+import {useWebSocket} from "./features/useWebSocket.js";
+
 let localStream;
 let peerConnection;
-let roomId;
-let ws;
+let roomId = '123';
 
 const configuration = {
     // iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
-
-function connectWebSocket() {
-    ws = new WebSocket(`ws://${window.location.host}`);
-
-    ws.onopen = () => {
-        console.log('WebSocket connected');
-    };
-
-    ws.onmessage = (event) => {
-        console.log('Received raw message:', event.data);
-        let data;
-        try {
-            data = JSON.parse(event.data);
-            console.log('Parsed message:', data);
-        } catch (error) {
-            console.error('Error parsing message:', error);
-            return;
-        }
-
-        switch (data.type) {
-            case 'user-connected':
-                console.log('Another user connected, creating offer');
-                createPeerConnection(true);
-                break;
-            case 'offer':
-                console.log('Received offer, creating answer');
-                handleOffer(data.offer);
-                break;
-            case 'answer':
-                console.log('Received answer');
-                handleAnswer(data.answer);
-                break;
-            case 'ice-candidate':
-                console.log('Received ICE candidate');
-                handleIceCandidate(data.candidate);
-                break;
-        }
-    };
-
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    ws.onclose = () => {
-        console.log('WebSocket disconnected');
-    };
-}
+const {sendWebSocketMessage,addWebSocketMessageHandlers} = useWebSocket()
 
 async function init() {
     try {
@@ -61,24 +16,27 @@ async function init() {
     } catch (error) {
         console.error('Error accessing media devices:', error);
     }
-    connectWebSocket();
+
 }
 
 init();
 
 document.getElementById('joinBtn').addEventListener('click', () => {
-    roomId = document.getElementById('roomId').value;
     if (roomId) {
         console.log('Joining room:', roomId);
-        ws.send(JSON.stringify({ type: 'join', roomId }));
+        sendWebSocketMessage({ type: 'join', roomId });
+
     }
 });
 
-function createPeerConnection(isInitiator) {
+async function  createPeerConnection(isInitiator) {
+
     console.log('Creating peer connection, isInitiator:', isInitiator);
     peerConnection = new RTCPeerConnection(configuration);
 
-    localStream.getTracks().forEach(track => {
+    const tracks =   localStream.getTracks()
+
+    tracks.forEach(track => {
         peerConnection.addTrack(track, localStream);
     });
 
@@ -90,7 +48,8 @@ function createPeerConnection(isInitiator) {
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
             console.log('Sending ICE candidate');
-            sendMessage({
+
+            sendWebSocketMessage({
                 type: 'ice-candidate',
                 roomId,
                 candidate: event.candidate
@@ -99,53 +58,72 @@ function createPeerConnection(isInitiator) {
     };
 
     if (isInitiator) {
+        try {
         console.log('Creating offer');
-        peerConnection.createOffer()
-            .then(offer => peerConnection.setLocalDescription(offer))
-            .then(() => {
-                console.log('Sending offer');
-                sendMessage({
-                    type: 'offer',
-                    roomId,
-                    offer: peerConnection.localDescription
-                });
-            })
-            .catch(error => console.error('Error creating offer:', error));
+         const  offer =   await  peerConnection.createOffer()
+
+       await peerConnection.setLocalDescription(offer)
+
+        sendWebSocketMessage({
+            type: 'offer',
+            roomId,
+            offer: peerConnection.localDescription
+        });
+
+        console.log('Sending offer');
+
+        }
+        catch (e) {
+            console.log(     'Error creating offer:', e)
+        }
     }
 }
 
-function sendMessage(message) {
-    const jsonMessage = JSON.stringify(message);
-    console.log('Sending message:', jsonMessage);
-    ws.send(jsonMessage);
+
+async function handleUserConnected(data) {
+    await  createPeerConnection(true);
+    console.log('Another user connected, creating offer');
 }
 
-async function handleOffer(offer) {
+
+async function handleOffer({offer}) {
     console.log('Received offer');
     if (!peerConnection) {
-        createPeerConnection(false);
+      await  createPeerConnection(false);
     }
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
+
     console.log('Sending answer');
-    sendMessage({
+
+    sendWebSocketMessage({
         type: 'answer',
         roomId,
         answer: peerConnection.localDescription
-    });
+    })
 }
 
-async function handleAnswer(answer) {
-    console.log('Received answer');
+async function handleAnswer({answer}) {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    console.log('Received answer');
 }
 
-async function handleIceCandidate(candidate) {
-    console.log('Received ICE candidate');
+async function handleIceCandidate({candidate}) {
     try {
         await peerConnection.addIceCandidate(candidate);
+        console.log('Received ICE candidate');
     } catch (error) {
         console.error('Error adding ICE candidate:', error);
     }
 }
+
+const events =
+{
+    'offer':handleOffer,
+    'user-connected':handleUserConnected,
+    'ice-candidate':handleIceCandidate,
+    'answer': handleAnswer
+}
+addWebSocketMessageHandlers(events)
