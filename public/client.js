@@ -1,6 +1,7 @@
+
+
 import {useWebSocket} from "./features/useWebSocket.js";
 import {useCurrentUser} from "./features/useCurrentUser.js";
-
 
 let peerConnection;
 let roomId = '123';
@@ -24,6 +25,7 @@ const appendStreamToDom = ({streamData, isCurrentUserStream= false })=> {
     videoStream.srcObject = streamData
     videoStream.autoplay = true
 
+    videoStream.muted = true
 
     if ( isCurrentUserStream ) {
 
