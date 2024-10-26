@@ -6,3 +6,8 @@ body {
 a {
   color: #00B7FF;
 }
+
+.my-stream {
+  border: 2px solid dodgerblue;
+  border-radius: 5px;
+}

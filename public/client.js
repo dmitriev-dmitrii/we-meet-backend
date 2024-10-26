@@ -1,48 +1,58 @@
 import {useWebSocket} from "./features/useWebSocket.js";
+import {useCurrentUser} from "./features/useCurrentUser.js";
 
-let localStream;
+
 let peerConnection;
 let roomId = '123';
 
-const configuration = {
-    // iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-};
 const {sendWebSocketMessage,addWebSocketMessageHandlers} = useWebSocket()
-
-async function init() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        document.getElementById('localVideo').srcObject = localStream;
-    } catch (error) {
-        console.error('Error accessing media devices:', error);
-    }
-
-}
-
-init();
+const {initUserStream,userStream} =  useCurrentUser()
 
 document.getElementById('joinBtn').addEventListener('click', () => {
     if (roomId) {
         console.log('Joining room:', roomId);
         sendWebSocketMessage({ type: 'join', roomId });
-
     }
 });
 
-async function  createPeerConnection(isInitiator) {
+const videosContainer = document.getElementById('videos')
+
+const appendStreamToDom = ({streamData, isCurrentUserStream= false })=> {
+
+   const videoStream =  document.createElement('video')
+
+    videoStream.srcObject = streamData
+    videoStream.autoplay = true
+
+
+    if ( isCurrentUserStream ) {
+
+        videoStream.classList.add('my-stream')
+        videoStream.muted = true
+    }
+
+    videosContainer.append(videoStream)
+}
+
+async function  createPeerConnection(isInitiator = false) {
 
     console.log('Creating peer connection, isInitiator:', isInitiator);
-    peerConnection = new RTCPeerConnection(configuration);
+    peerConnection = new RTCPeerConnection();
 
-    const tracks =   localStream.getTracks()
+   const userStream =   await  initUserStream()
+
+    appendStreamToDom({streamData:userStream,isCurrentUserStream : true})
+
+    const tracks =   userStream.getTracks()
 
     tracks.forEach(track => {
-        peerConnection.addTrack(track, localStream);
+        peerConnection.addTrack(track, userStream);
     });
 
-    peerConnection.ontrack = (event) => {
-        console.log('Received remote track');
-        document.getElementById('remoteVideo').srcObject = event.streams[0];
+    peerConnection.ontrack = ({streams}) => {
+        const [streamData] = streams
+
+        appendStreamToDom({streamData})
     };
 
     peerConnection.onicecandidate = (event) => {
@@ -62,15 +72,13 @@ async function  createPeerConnection(isInitiator) {
         console.log('Creating offer');
          const  offer =   await  peerConnection.createOffer()
 
-       await peerConnection.setLocalDescription(offer)
+         await peerConnection.setLocalDescription(offer)
 
-        sendWebSocketMessage({
-            type: 'offer',
-            roomId,
-            offer: peerConnection.localDescription
-        });
-
-        console.log('Sending offer');
+            sendWebSocketMessage({
+                type: 'offer',
+                roomId,
+                offer: peerConnection.localDescription
+            });
 
         }
         catch (e) {
@@ -81,14 +89,16 @@ async function  createPeerConnection(isInitiator) {
 
 
 async function handleUserConnected(data) {
+
     await  createPeerConnection(true);
     console.log('Another user connected, creating offer');
 }
 
 
 async function handleOffer({offer}) {
-    console.log('Received offer');
+    console.log('handleOffer');
     if (!peerConnection) {
+      console.log('handleOffer peerConnection is ',peerConnection)
       await  createPeerConnection(false);
     }
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
