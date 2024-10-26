@@ -1,27 +1,36 @@
 import { WebSocket } from 'ws';
-const MEET_CHANNELS = {
-    MEET_CHAT_MESSAGES_CHANNEL: 1 ,
-    MEET_USERS_CHANNEL: 2 ,
-}
-
+import {MEET_WEB_SOCKET_EVENTS} from "../constatnts/meetWebSocket.js";
+import {usersService} from "../services/usersService.js";
+import { parse } from 'cookie';
+import {meetService} from "../services/meetService.js";
 const rooms = new Map();
-const  onSocketConnect = (ws , req) => {
 
-    console.log('New client connected');
+const  onSocketConnect = (ws , {headers}) => {
 
-    ws.on('message', (message) => {
+    const { userId  , userName } = parse(headers.cookie)
+
+    console.log('New client connected userId:', userName , userId );
+
+    if (userId) {
+        usersService.bindWsClientToUser({ userId, userName, ws })
+    }
+
+    ws.on('message', (payload) => {
         let data;
         try {
-            data = JSON.parse(message);
+            data = JSON.parse(payload);
             console.log('Parsed message:', data);
+
         } catch (error) {
             console.error('Error parsing message:', error);
             return;
         }
 
-        switch (data.type) {
-            case 'join':
-                handleJoin(ws, data.roomId);
+        const { type } = data
+
+        switch (type) {
+            case MEET_WEB_SOCKET_EVENTS.JOIN_MEET:
+                joinMeetHandle(data);
                 break;
             case 'offer':
             case 'answer':
@@ -39,21 +48,40 @@ const  onSocketConnect = (ws , req) => {
 }
 
 
-function handleJoin(ws, roomId) {
-    if (!rooms.has(roomId)) {
-        rooms.set(roomId, new Set());
-    }
-    rooms.get(roomId).add(ws);
-    ws.roomId = roomId;
-    console.log(`Client joined room ${roomId}. Total clients in room: ${rooms.get(roomId).size}`);
+async function   joinMeetHandle( {  userName, meetId , userId }   ) {
 
-    if (rooms.get(roomId).size > 1) {
-        console.log(`Sending 'user-connected' to clients in room ${roomId}`);
-        broadcastToRoom(ws, roomId, JSON.stringify({ type: 'user-connected' }));
-    }
+  const meet =  await meetService.findMeetById(meetId)
+    console.log('joinMeetHandle', meet)
+
+  if ( !meet ) {
+     return
+  }
+
+  const message = {
+      type: MEET_WEB_SOCKET_EVENTS.USER_CONNECTED,
+      userId,
+      userName
+  }
+
+  meet.appendUserToMeet({userId})
+  await  meet.broadcastToMeetUsers({userId , message})
+    // usersService.bindWsClientToUser({ userId, ws })
+
+    // if (!rooms.has(roomId)) {
+    //     rooms.set(roomId, new Set());
+    // }
+    // rooms.get(roomId).add(ws);
+    // ws.roomId = roomId;
+
+    // console.log(`Client joined room ${roomId}. Total clients in room: ${rooms.get(roomId).size}`);
+
+    // if (rooms.get(roomId).size > 1) {
+    //     console.log(`Sending 'user-connected' to clients in room ${roomId}`);
+    //     broadcastToRoom(ws, roomId, JSON.stringify({ type: 'user-connected' }));
+    // }
 }
 
-function broadcastToRoom(sender, roomId, message) {
+function broadcastToRoom({sender, roomId, message}) {
 
     console.log(`Broadcasting to room ${roomId}:`, message);
 
