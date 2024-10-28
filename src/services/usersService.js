@@ -1,36 +1,39 @@
+import WebSocket from 'ws';
 
- const usersStorage = new Map()
+const usersStorage = new Map()
 
- class User {
-     userId = ''
-     userName = ''
-     ws = undefined
-     constructor({userName= '', userId , ws}) {
-         this.userId   = userId
-         this.userName = userName.toLowerCase()
-         this.ws = ws
-     }
- }
+class User {
+    userId = ''
+    userName = ''
+    ws = undefined
+    constructor({userName= '', userId , ws}) {
+        this.userId   = userId
+        this.userName = userName.toLowerCase()
+        this.ws = ws
+    }
+}
 
 export const usersService = {
 
 
     findUserById : async (userId)=> {
-
-        return  usersStorage.get(userId)
+        return usersStorage.get(userId);
     },
 
-    bindWsClientToUser : ({ userId , ws })=> {
+    bindWsClientToUser: ({ userId, userName, ws }) => {
 
-        const user = usersStorage.has(userId) ? usersStorage.get(userId) : usersStorage.set(userId , new User({ userId , ws }))
+        usersStorage.set(userId, new User({ userId, userName, ws }));
 
-        if (user && ws) {
-            user.ws = ws
-            usersStorage.set(userId , user)
-            return
+        return  usersStorage.get(userId);
+    },
+
+    findUserByWs: (ws) => {
+        for (const [userId, user] of usersStorage.entries()) {
+            if (user.ws === ws) {
+                return user;
+            }
         }
-
-        console.log(' bindWsClientToUser err' , )
+        return null;
     }
 
 }

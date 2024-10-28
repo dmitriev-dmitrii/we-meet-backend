@@ -1,46 +1,55 @@
 import {usersService} from "./usersService.js";
 import {WebSocket} from "ws";
-
+import {MEET_WEB_SOCKET_EVENTS} from "../constatnts/meetWebSocket.js";
 
  const meetStorage = new Map()
 
  class Meet {
      meetId = '';
      meetUsers = [];
+     meetChatMessages = [];
      meetOwner = '';
 
          constructor({ meetId, meetOwner }) {
          this.meetId = meetId
          this.meetOwner = meetOwner
-
      }
 
-    appendUserToMeet( { userId } ) {
-         if (userId) {
-             this.meetUsers.push(userId)
-             return
-         }
-        console.warn('appendUserToMeet userId is ' , userId )
+   async appendUserToMeet({ userId='' }) {
+
+    if ( userId && !this.meetUsers.includes(userId) ) {
+        this.meetUsers.push(userId)
     }
-    async broadcastToMeetUsers( { senderUserId = '' , message= {} } ) {
 
-       if (!this.meetUsers.length > 1) {
-             return
-       }
+    return this.meetUsers
+   }
 
-       const payload = JSON.stringify(message)
+    async broadcastToMeetUsers({ senderUserId = '', message = {} }) {
+        const payload = JSON.stringify(message)
+        const { type } = message
 
-       for (  const meetUserId of  this.meetUsers ) {
+        if (type === MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE) {
+            message.sentAt = Date.now()
+            this.meetChatMessages.push(message)
+        }
 
-       const  { ws }  = await  usersService.findUserById(meetUserId );
 
-            if (meetUserId !== senderUserId && ws?.readyState === WebSocket.OPEN) {
-                ws.send(payload);
+        for (const meetUserId of this.meetUsers) {
+
+            const user = await usersService.findUserById(meetUserId);
+
+            const  isRepeatToSender =  meetUserId !== senderUserId
+
+            if (isRepeatToSender && user?.ws?.readyState === WebSocket.OPEN) {
+                try {
+                    user.ws.send(payload);
+                    console.log('Message sent successfully to:', meetUserId);
+                } catch (error) {
+                    console.error('Failed to send message:', error);
+                }
             }
-
-       }
-
-     }
+        }
+    }
  }
 
 export const meetService = {
@@ -55,10 +64,10 @@ export const meetService = {
             meetId,
             meetOwner: userId,
         })
-        meet.meetUsers.push(userId)
+
         meetStorage.set( meetId , meet )
 
-        return  meet
+        return   meetStorage.get(meetId)
     },
 
     findMeetById : async (id)=> {

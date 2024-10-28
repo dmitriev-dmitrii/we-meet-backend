@@ -21,6 +21,11 @@ meetRouter.post('/create',async ({body}, res)=> {
 
   const {userId, userName} = body
 
+  if (!userId || !userName) {
+    res.sendStatus(constants.HTTP_STATUS_UNAUTHORIZED)
+    return
+  }
+
   const meet = await  createMeet({ userName,userId })
 
   res.send(meet)

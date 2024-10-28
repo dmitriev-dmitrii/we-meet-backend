@@ -1,6 +1,12 @@
+// TODO to enum
 export const MEET_WEB_SOCKET_EVENTS = {
-    JOIN_MEET: 'join-meet',
-    USER_CONNECTED: 'user-connected',
+
+    USER_ENTER_MEET:'enter-meet',
+    USER_LEAVE_MEET: `leave-meet`,
+
+
+    CHAT_MESSAGE: 'chat-message',
+
     // LEAVE: `leave`,
     // SHARE_ROOMS: `share-rooms`, // Send all available rooms
     // ADD_PEER: 'add-peer', // Creating new connection between clients
