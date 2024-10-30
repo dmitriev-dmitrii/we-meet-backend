@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {usersService} from "../services/usersService.js";
+import {usersService} from "../services/users/usersService.js";
 import {constants} from "http2";
 
 const usersRouter = Router()
@@ -12,25 +12,26 @@ const usersRouter = Router()
 //
 // usersRouter.put('/refresh-tokens', updateUserAuthTokens );
 
-
-usersRouter.get('/',(req, res)=> {
-  res.send('users')
-})
-
-// usersRouter.post('/save',async ({body}, res)=> {
-//
-//   const { userName,userId } = body
-//
-//   if (!userName || !userId) {
-//
-//     res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)
-//     return
-//   }
-//
-//   const user = await  usersService.saveUser({ userName , userId } )
-//
-//   res.send(user)
+// usersRouter.get('/',(req, res)=> {
+//   res.send('users')
 // })
+
+usersRouter.post('/auth',async ({ body, fingerprint }, res)=> {
+
+  const { userName='' } = body
+  const   userFingerprint = fingerprint.hash
+
+  if (!userName) {
+    res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)
+    return
+  }
+
+  const user = await  usersService.saveUser({ userName  , userFingerprint } )
+
+  res.cookie('userFingerprint', userFingerprint, {  httpOnly: true });
+
+  res.send(user) //todo user dto
+})
 
 
 export  default  usersRouter;

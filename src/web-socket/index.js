@@ -1,18 +1,13 @@
 import { WebSocket } from 'ws';
 import {MEET_WEB_SOCKET_EVENTS} from "../constatnts/meetWebSocket.js";
-import {usersService} from "../services/usersService.js";
-import { parse } from 'cookie';
-import {meetService} from "../services/meetService.js";
+import {usersService} from "../services/users/usersService.js";
+import {meetService} from "../services/meet/meetService.js";
 
-// const rooms = new Map();
 
-const  onSocketConnect = (ws , {headers} ) => {
 
-    const { cookie = '' } =  headers
 
-    const { userId  , userName } = parse( cookie )
+const  onSocketConnect = (ws , req ) => {
 
-    console.log('New client connected userId:', userName , userId );
 
     ws.on('message', (payload) => {
 
@@ -22,6 +17,8 @@ const  onSocketConnect = (ws , {headers} ) => {
             // console.log('Parsed message:', data);
 
             data.ws = ws
+            data.createdAt = Date.now()
+
         } catch (error) {
             console.error('Error parsing message:', error);
             return;
@@ -30,9 +27,12 @@ const  onSocketConnect = (ws , {headers} ) => {
         const { type } = data
 
         switch (type) {
-            case MEET_WEB_SOCKET_EVENTS.USER_ENTER_MEET:
-                joinMeetHandle(data);
+            case  MEET_WEB_SOCKET_EVENTS.USER_WEB_SOCKET_AUTH:
+                userWebSocketAuth(data);
                 break;
+            // case MEET_WEB_SOCKET_EVENTS.USER_JOIN_MEET:
+            //     userJoinMeetHandle(data);
+            //     break;
             case MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE:
                 meetChatMessageHandle(data);
                 break;
@@ -45,18 +45,23 @@ const  onSocketConnect = (ws , {headers} ) => {
         }
     });
 
-    ws.on('close', (code, reason) => {
+    ws.on('close' ,  async ( code, reason ) => {
 
-        const user = usersService.findUserByWs(ws);
+        const user = await usersService.findUserByWs(ws)
 
+        if (!user) {
+            return
+        }
 
-        console.log('Client disconnected:', {
-            userId: user?.userId,
-            userName: user?.userName,
-            code,
-            reason
-        });
+        const {  userId ,  meetId } = user
 
+        await  usersService.disconnectUser(userId);
+
+        const meet = await meetService.findMeetById(  meetId  )
+
+        if (meet) {
+            await  meet.removeUserFromMeet({ userId })
+        }
 
     });
 
@@ -77,31 +82,44 @@ async function meetChatMessageHandle({ userName, meetId, userId, text = '' }) {
     }
 
     await meet.broadcastToMeetUsers({
-        message 
+        message ,
     })
 }
-async function   joinMeetHandle( {  userName, meetId , userId='' ,  ws }   ) {
+// async function   userJoinMeetHandle( {  userName, meetId , userId='' ,  ws }   ) {
+//
+//     const user = await usersService.findUserById(userId)
+//
+//    if (!user) {
+//        console.error(' joinMeetHandle err user is',user)
+//         return
+//    }
+//
+//    const meet = await meetService.findMeetById(meetId)
+//
+//    if (!meet) {
+//       console.log('joinMeetHandle warn meet is', meet)
+//       return
+//    }
+//
+//     await meet.appendUserToMeet(user)
+// }
 
-   if (!userId) {
-       console.error(' joinMeetHandle err  userId is',userId )
+async function  userWebSocketAuth ( { userFingerprint = ''  ,  ws } ) {
+
+    const user = await  usersService.findUserByFingerprint(userFingerprint)
+
+    if (!user) {
+        console.log('err userWebSocketAuth user is no auth ')
         return
-   }
+    }
 
-   const meet = await meetService.findMeetById(meetId)
+    const { userId , userName } = user
 
-   if (!meet) {
-      console.log('joinMeetHandle warn meet is', meet)
-      return
-   }
+    await usersService.bindWsClientToUser({ userId, ws })
 
-    await usersService.bindWsClientToUser({ userId, userName, ws })
-
-   console.log('AppendUserToMeet before:', meet.meetUsers)
-   const result = await meet.appendUserToMeet({userId})
-   console.log('AppendUserToMeet result:', result)
+    // const meet = await meetService.findMeetById(meetId) ?? await meetService.createMeet({ userId , userName })
 
 }
-
 // function broadcastToRoom({sender, roomId, message}) {
 //
 //     console.log(`Broadcasting to room ${roomId}:`, message);

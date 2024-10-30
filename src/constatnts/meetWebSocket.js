@@ -1,9 +1,8 @@
 // TODO to enum
 export const MEET_WEB_SOCKET_EVENTS = {
-
-    USER_ENTER_MEET:'enter-meet',
-    USER_LEAVE_MEET: `leave-meet`,
-
+    USER_WEB_SOCKET_AUTH:'socket-auth',
+    USER_JOIN_MEET: 'join-meet',
+    USER_LEAVE_MEET:'leave-meet',
 
     CHAT_MESSAGE: 'chat-message',
 
