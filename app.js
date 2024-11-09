@@ -29,7 +29,7 @@ const wss = new WebSocketServer({ server });
 setupRoutes(app);
 setupWebSocket(wss);
 
-const PORT = 3001;
+const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`app listen : http://localhost:${PORT}/`);
 });
