@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5173', // todo isDev
+    origin: 'http://localhost:3003', // todo to env
     credentials: true,
 }))
 app.use(express.json());
