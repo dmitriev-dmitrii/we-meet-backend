@@ -1,19 +1,19 @@
+
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import {setupRoutes} from "./src/routes/index.js";
 import {setupWebSocket} from "./src/web-socket/index.js";
 import cors from 'cors'
 import cookieParser from "cookie-parser";
 import Fingerprint from "express-fingerprint";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import {env} from "./src/constatnts/env.js";
+
+const {APP_PORT} = env
 
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:3003', // todo to env
+    origin: ['https://dmitriev-dmitrii.github.io','http://localhost:3003'],
     credentials: true,
 }))
 app.use(express.json());
@@ -21,15 +21,13 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(Fingerprint())
 
-app.use(express.static(path.join(__dirname, './public')));
-
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const webSocketServer = new WebSocketServer({ server });
 
 setupRoutes(app);
-setupWebSocket(wss);
+setupWebSocket(webSocketServer);
 
-const PORT = 3000;
-server.listen(PORT, () => {
-    console.log(`app listen : http://localhost:${PORT}/`);
+
+server.listen(APP_PORT, () => {
+    console.log(`app listen : http://localhost:${APP_PORT}/`);
 });

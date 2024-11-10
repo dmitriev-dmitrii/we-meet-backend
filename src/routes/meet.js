@@ -19,10 +19,8 @@ meetRouter.get('/:meetId',async ({params}, res)=> {
     res.send(meet)
 })
 
-meetRouter.post('/create',async (req, res)=> {
-  console.log(req)
+meetRouter.post('/create',async ({body}, res)=> {
 
-  const {body} = req
   const {userId, userName} = body
 
   if (!userId || !userName) {
