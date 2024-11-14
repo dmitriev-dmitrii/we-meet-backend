@@ -9,12 +9,12 @@ import {meetService} from "../services/meet/meetService.js";
 const  onSocketConnect = (ws , req ) => {
 
 
-    ws.on('message', (payload) => {
+    ws.on('message',async (payload) => {
 
         let data;
         try {
             data = JSON.parse(payload);
-            // console.log('Parsed message:', data);
+            console.log('Parsed message:', data);
 
             data.ws = ws
             data.createdAt = Date.now()
@@ -28,13 +28,13 @@ const  onSocketConnect = (ws , req ) => {
 
         switch (type) {
             case  MEET_WEB_SOCKET_EVENTS.USER_WEB_SOCKET_AUTH:
-                userWebSocketAuth(data);
+        await        userWebSocketAuth(data);
                 break;
             // case MEET_WEB_SOCKET_EVENTS.USER_JOIN_MEET:
             //     userJoinMeetHandle(data);
             //     break;
             case MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE:
-                meetChatMessageHandle(data);
+           await     meetChatMessageHandle(data);
                 break;
 
             // case 'offer':

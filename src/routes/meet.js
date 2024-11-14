@@ -42,15 +42,14 @@ meetRouter.post('/join-request',async ({body,cookies}, res)=> {
   const meet = await meetService.findMeetById(meetId)
 
   if (!meet) {
-
+    // TODO create meet
     res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
     return
 
   }
 
-  // console.log('meet.meetUsers val', meet.meetUsers.values() )
-
   const user = await usersService.findUserById(userFingerprint)
+
 
   if (!user) {
     res.sendStatus( constants.HTTP_STATUS_UNAUTHORIZED )
@@ -60,8 +59,6 @@ meetRouter.post('/join-request',async ({body,cookies}, res)=> {
   await meet.appendUserToMeet(user)
 
   user.setMeetId(meet.meetId)
-
-
 
   // todo feature запрос на вход в встречу от юзера
   //  console.log( 'user' , user )

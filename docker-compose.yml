@@ -1,0 +1,12 @@
+services:
+  app:
+    container_name: ${APP_NAME}
+    restart: always
+    env_file: ./.env
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    build:
+      context: ./
+    volumes:
+      - ./src:/src
+      - ./nodemon.json:/nodemon.json
