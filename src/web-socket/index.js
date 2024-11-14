@@ -1,24 +1,25 @@
 import { WebSocket } from 'ws';
+
 import {MEET_WEB_SOCKET_EVENTS} from "../constatnts/meetWebSocket.js";
 import {usersService} from "../services/users/usersService.js";
 import {meetService} from "../services/meet/meetService.js";
+import { parse } from 'cookie';
 
 
+const  onSocketConnect = async  (ws , {headers} ) => {
 
+    const { userId  , userName } = parse(headers.cookie)
 
-const  onSocketConnect = (ws , req ) => {
-
+    await userWebSocketAuth({userId,ws})
 
     ws.on('message',async (payload) => {
 
         let data;
         try {
             data = JSON.parse(payload);
-            console.log('Parsed message:', data);
-
-            data.ws = ws
+            // console.log('Parsed message:', data);
             data.createdAt = Date.now()
-
+            data.ws = ws
         } catch (error) {
             console.error('Error parsing message:', error);
             return;
@@ -27,12 +28,6 @@ const  onSocketConnect = (ws , req ) => {
         const { type } = data
 
         switch (type) {
-            case  MEET_WEB_SOCKET_EVENTS.USER_WEB_SOCKET_AUTH:
-        await        userWebSocketAuth(data);
-                break;
-            // case MEET_WEB_SOCKET_EVENTS.USER_JOIN_MEET:
-            //     userJoinMeetHandle(data);
-            //     break;
             case MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE:
            await     meetChatMessageHandle(data);
                 break;
@@ -84,67 +79,22 @@ async function meetChatMessageHandle({ userName, meetId, userId, text = '' }) {
         message ,
     })
 }
-// async function   userJoinMeetHandle( {  userName, meetId , userId='' ,  ws }   ) {
-//
-//     const user = await usersService.findUserById(userId)
-//
-//    if (!user) {
-//        console.error(' joinMeetHandle err user is',user)
-//         return
-//    }
-//
-//    const meet = await meetService.findMeetById(meetId)
-//
-//    if (!meet) {
-//       console.log('joinMeetHandle warn meet is', meet)
-//       return
-//    }
-//
-//     await meet.appendUserToMeet(user)
-// }
 
-async function  userWebSocketAuth ( { userId = ''  ,  ws } ) {
+
+async function  userWebSocketAuth ( { userId  ,  ws } ) {
 
     const user = await  usersService.findUserById(userId)
 
     if (!user) {
-        console.log('err userWebSocketAuth user is no auth ')
+        console.log(`userWebSocketAuth cant find user by id ${userId} : => close ws`)
+        ws.close()
         return
     }
 
-
     await usersService.bindWsClientToUser({ userId, ws })
-
-    // const meet = await meetService.findMeetById(meetId) ?? await meetService.createMeet({ userId , userName })
-
 }
-// function broadcastToRoom({sender, roomId, message}) {
-//
-//     console.log(`Broadcasting to room ${roomId}:`, message);
-//
-//     if (rooms.has(roomId)) {
-//
-//         rooms.get(roomId).forEach((client) => {
-//             if (client !== sender && client.readyState === WebSocket.OPEN) {
-//                 console.log('Sending to client');
-//                 client.send(message);
-//             }
-//         });
-//     }
-// }
-//
-// function leaveAllRooms(ws) {
-//     if (ws.roomId && rooms.has(ws.roomId)) {
-//         rooms.get(ws.roomId).delete(ws);
-//         console.log(`Client left room ${ws.roomId}. Remaining clients: ${rooms.get(ws.roomId).size}`);
-//         if (rooms.get(ws.roomId).size === 0) {
-//             rooms.delete(ws.roomId);
-//             console.log(`Room ${ws.roomId} is now empty and has been deleted`);
-//         }
-//     }
-// }
-//
 
-export const  setupWebSocket = (ws)=> {
-    ws.on('connection', onSocketConnect );
+
+export const  setupWebSocket = (webSocketServer)=> {
+    webSocketServer.on('connection', onSocketConnect );
 }

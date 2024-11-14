@@ -8,8 +8,3 @@ export const  setupRoutes = (app)=> {
   app.use(`${API_VERSION_PREFIX}/meet`, meetRouter);
 }
 
-
-
-
-
-

@@ -7,9 +7,8 @@ class User {
     meetId = ''
     ws = {}
     constructor( { userName= '', userFingerprint='' } ) {
-
         this.userName = userName.trim().toLowerCase()
-        this.userId = userFingerprint + userName + Date.now()
+        this.userId = userFingerprint + userName
     }
 
     setMeetId( meetId ) {
@@ -47,24 +46,18 @@ export const usersService = {
     },
 
     findUserByWs: async (ws) => {
-
         for (const [userId, user] of usersStorage.entries()) {
             if (user.ws === ws) {
                 return user;
             }
         }
         return null;
-
     },
 
     disconnectUser: async (  userId ) => {
-
         const {ws} = usersStorage.get(userId)
-
         ws.close()
-
         return   usersStorage.delete(userId)
-
     }
 
 }

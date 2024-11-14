@@ -33,20 +33,17 @@ meetRouter.post('/create',async ({body}, res)=> {
   res.send(meet)
 })
 
-meetRouter.post('/join-request',async ({body,cookies ,signedCookies}, res)=> {
+meetRouter.post('/join-request',async ({body,cookies }, res)=> {
 try {
 
-  console.log('signedCookies',signedCookies)
-  console.log('cookies',cookies)
   const {meetId} = body
-
   const {userId} = cookies
 
   const meet = await meetService.findMeetById(meetId)
 
   if (!meet) {
     // TODO create meet
-    res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
+    res.sendStatus( constants.HTTP_STATUS_NOT_FOUND )
     return
 
   }

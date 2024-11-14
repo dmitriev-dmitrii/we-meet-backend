@@ -74,12 +74,14 @@ const  saveChatMessagesTypes =  [
 
         for (const user of this.meetUsers.values()) {
 
-            if ( !user.userIsOnline ) {
-                console.warn(` ${user.userName} Is not Online`, user.userIsOnline  ,'message', message );
-            }
+
 
             const  isRepeatToSender =  user.userId !== senderUserId
             //если нужно исключить отправителя из отправки, передать userId в поле senderUserId
+
+            if ( !user.userIsOnline && isRepeatToSender ) {
+                console.warn(` ${user.userName} Is not Online`, user.userIsOnline  ,'message', message );
+            }
 
             if ( isRepeatToSender && user.userIsOnline ) {
                 try {
