@@ -31,7 +31,7 @@ usersRouter.post('/auth',async ({ body, fingerprint }, res)=> {
 
   const { userId } =user
 
-  res.cookie('userId', userId, {  httpOnly: true });
+  res.cookie('userId', userId, {  httpOnly: true , secure: true , sameSite: 'none'});
 
   res.send(user) //todo user dto
 })
