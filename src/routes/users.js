@@ -18,7 +18,8 @@ const usersRouter = Router()
 
 usersRouter.post('/auth',async ({ body, fingerprint }, res)=> {
 
-  const { userName='' } = body
+  const { userName } = body
+
   const   userFingerprint = fingerprint.hash
 
   if (!userName) {
@@ -28,7 +29,9 @@ usersRouter.post('/auth',async ({ body, fingerprint }, res)=> {
 
   const user = await  usersService.saveUser({ userName  , userFingerprint } )
 
-  res.cookie('userFingerprint', userFingerprint, {  httpOnly: true });
+  const { userId } =user
+
+  res.cookie('userId', userId, {  httpOnly: true });
 
   res.send(user) //todo user dto
 })

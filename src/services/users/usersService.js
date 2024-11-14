@@ -2,16 +2,14 @@ import WebSocket from 'ws';
 
 const usersStorage = new Map()
 class User {
-    userId = '' //TODO удалить все userId
+    userId = ''
     userName = ''
-    userFingerprint = ''
     meetId = ''
     ws = {}
     constructor( { userName= '', userFingerprint='' } ) {
-        // this.userId   = String( Math.floor(Math.random() * 10000));
+
         this.userName = userName.trim().toLowerCase()
-        this.userFingerprint = userFingerprint
-        this.userId   =  userFingerprint
+        this.userId = userFingerprint + userName + Date.now()
     }
 
     setMeetId( meetId ) {
@@ -19,7 +17,7 @@ class User {
     }
 
     get userIsOnline (){
-        return Boolean(this.ws?.readyState === WebSocket.OPEN && this.userFingerprint)
+        return Boolean(this.ws?.readyState === WebSocket.OPEN)
     }
 }
 
@@ -31,12 +29,9 @@ export const usersService = {
 
         usersStorage.set(user.userId , user);
 
-        return user
+        return usersStorage.get(user.userId)
     },
 
-    findUserById : async (userId)=> {
-        return usersStorage.get(userId);
-    },
 
     bindWsClientToUser: ({ userId, ws }) => {
 
@@ -47,20 +42,10 @@ export const usersService = {
         return  usersStorage.get(userId);
     },
 
-    findUserByFingerprint: (userFingerprint='') => {
-
-    if (userFingerprint) {
-        for ( const [userId, user] of usersStorage.entries() ) {
-
-            if (user.userFingerprint === userFingerprint) {
-
-                return user;
-            }
-        }
-    }
-
-      return null;
+    findUserById : async (userId)=> {
+        return usersStorage.get(userId);
     },
+
     findUserByWs: async (ws) => {
 
         for (const [userId, user] of usersStorage.entries()) {

@@ -55,14 +55,13 @@ const  onSocketConnect = (ws , req ) => {
 
         const {  userId ,  meetId } = user
 
-        await  usersService.disconnectUser(userId);
-
         const meet = await meetService.findMeetById(  meetId  )
 
         if (meet) {
             await  meet.removeUserFromMeet({ userId })
         }
 
+        await  usersService.disconnectUser(userId);
     });
 
 }
@@ -104,16 +103,15 @@ async function meetChatMessageHandle({ userName, meetId, userId, text = '' }) {
 //     await meet.appendUserToMeet(user)
 // }
 
-async function  userWebSocketAuth ( { userFingerprint = ''  ,  ws } ) {
+async function  userWebSocketAuth ( { userId = ''  ,  ws } ) {
 
-    const user = await  usersService.findUserByFingerprint(userFingerprint)
+    const user = await  usersService.findUserById(userId)
 
     if (!user) {
         console.log('err userWebSocketAuth user is no auth ')
         return
     }
 
-    const { userId , userName } = user
 
     await usersService.bindWsClientToUser({ userId, ws })
 

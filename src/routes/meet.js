@@ -33,11 +33,14 @@ meetRouter.post('/create',async ({body}, res)=> {
   res.send(meet)
 })
 
-meetRouter.post('/join-request',async ({body,cookies}, res)=> {
+meetRouter.post('/join-request',async ({body,cookies ,signedCookies}, res)=> {
+try {
 
+  console.log('signedCookies',signedCookies)
+  console.log('cookies',cookies)
   const {meetId} = body
 
-  const {userFingerprint} = cookies
+  const {userId} = cookies
 
   const meet = await meetService.findMeetById(meetId)
 
@@ -48,10 +51,10 @@ meetRouter.post('/join-request',async ({body,cookies}, res)=> {
 
   }
 
-  const user = await usersService.findUserById(userFingerprint)
-
+  const user = await usersService.findUserById(userId)
 
   if (!user) {
+    console.log('/join-request cant find user by id ', userId )
     res.sendStatus( constants.HTTP_STATUS_UNAUTHORIZED )
     return
   }
@@ -64,7 +67,13 @@ meetRouter.post('/join-request',async ({body,cookies}, res)=> {
   //  console.log( 'user' , user )
 
   // todo meet dto
+
   res.send(meet)
+
+}catch (e) {
+  console.log('/join-request', e )
+  res.send(e)
+}
 })
 
 

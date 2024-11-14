@@ -28,7 +28,7 @@ const  saveChatMessagesTypes =  [
     const { userId, userName, userIsOnline } = user
 
     if(!userId || !userName || !userIsOnline ) {
-        console.warn( 'appendUserToMeet err','userId:', userId ,'userName',userName ,'userIsOnline',userIsOnline )
+        console.log( (`'appendUserToMeet err','userId:', ${userId} ,'userName',${userName} ,'userIsOnline',${userIsOnline}` ))
         return
     }
 
@@ -58,7 +58,7 @@ const  saveChatMessagesTypes =  [
 
        await this.broadcastToMeetUsers({ senderUserId:userId, message } )
 
-       return this.meetUsers
+
    }
 
     async broadcastToMeetUsers({ senderUserId = '', message = {} }) {
@@ -72,11 +72,10 @@ const  saveChatMessagesTypes =  [
             this.meetChatMessages.push(message)
         }
 
-
         for (const user of this.meetUsers.values()) {
 
             if ( !user.userIsOnline ) {
-                console.warn(` ${user.name} userIsOnline is ` , user.userIsOnline );
+                console.warn(` ${user.name} userIsOnline is ` , user.userIsOnline  ,'message', message );
             }
 
             const  isRepeatToSender =  user.userId !== senderUserId
