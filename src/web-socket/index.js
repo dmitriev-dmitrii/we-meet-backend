@@ -20,7 +20,8 @@ const  onSocketConnect = async  (ws , {headers} ) => {
             data = JSON.parse(payload);
             // console.log('Parsed message:', data);
             data.createdAt = Date.now()
-            data.ws = ws
+            // data.ws = ws
+
         } catch (error) {
             console.error('Error parsing message:', error);
             return;
@@ -32,6 +33,9 @@ const  onSocketConnect = async  (ws , {headers} ) => {
             case MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE:
            await     meetChatMessageHandle(data);
                 break;
+         // case MEET_WEB_SOCKET_EVENTS.RTC_ICE_CANDIDATE:
+         //        await  onCandidate(data);
+         //     break;
 
             // case 'offer':
             // case 'answer':
@@ -59,6 +63,24 @@ const  onSocketConnect = async  (ws , {headers} ) => {
 
         await  usersService.disconnectUser(userId);
     });
+
+}
+
+
+async function onCandidate(data) {
+    const {meetId, userId} = data
+
+    const meet = await meetService.findMeetById(meetId)
+
+    if (!meet) {
+            return
+    }
+
+
+
+    data.senderUserId = userId
+
+    await meet.broadcastToMeetUsers( data )
 
 }
 

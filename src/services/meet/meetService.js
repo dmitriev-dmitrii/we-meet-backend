@@ -49,8 +49,13 @@ const  saveChatMessagesTypes =  [
 
    async removeUserFromMeet({userId}) {
 
-       const {userName} =  this.meetUsers.get(userId)
+     const user =    this.meetUsers.get(userId)
+       console.log('leave user', userId)
+        if (! user ) {
+             return
+        }
 
+       const {userName} = user
        const message = {
              type: MEET_WEB_SOCKET_EVENTS.USER_LEAVE_MEET,
              userName,
@@ -59,7 +64,6 @@ const  saveChatMessagesTypes =  [
        }
 
        await this.broadcastToMeetUsers({ senderUserId:userId, message } )
-
 
    }
 
