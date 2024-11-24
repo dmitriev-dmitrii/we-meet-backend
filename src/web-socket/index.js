@@ -8,7 +8,8 @@ import { parse } from 'cookie';
 
 const  onSocketConnect = async  (ws , {headers} ) => {
 
-    const { userId  , userName } = parse(headers.cookie)
+    const {cookie = ''} = headers
+    const { userId } = parse(cookie)
 
     await userWebSocketAuth({userId,ws})
 
@@ -79,7 +80,6 @@ async function meetChatMessageHandle({ userName, meetId, userId, text = '' }) {
         message ,
     })
 }
-
 
 async function  userWebSocketAuth ( { userId  ,  ws } ) {
 

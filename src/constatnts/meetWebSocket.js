@@ -6,6 +6,11 @@ export const MEET_WEB_SOCKET_EVENTS = {
 
     CHAT_MESSAGE: 'chat-message',
 
+    RTC_OFFER : 'rtc-offer',
+    RTC_ANSWER :'rtc-answer',
+    RTC_ICE_CANDIDATE : 'rtc-ice-candidate',
+
+
     // LEAVE: `leave`,
     // SHARE_ROOMS: `share-rooms`, // Send all available rooms
     // ADD_PEER: 'add-peer', // Creating new connection between clients

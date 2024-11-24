@@ -27,7 +27,7 @@ export const usersService = {
         const user = new User({ userName  , userFingerprint })
 
         usersStorage.set(user.userId , user);
-
+        console.log('saveUser', user.userId)
         return usersStorage.get(user.userId)
     },
 
@@ -35,6 +35,11 @@ export const usersService = {
     bindWsClientToUser: ({ userId, ws }) => {
 
        const user  = usersStorage.get(userId)
+
+        if (!user) {
+            console.log('bindWsClientToUser warn cant find user by userId:' ,userId )
+            return
+        }
         user.ws = ws
         usersStorage.set(userId, user);
 

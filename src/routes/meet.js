@@ -21,14 +21,14 @@ meetRouter.get('/:meetId',async ({params}, res)=> {
 
 meetRouter.post('/create',async ({body}, res)=> {
 
-  const {userId, userName} = body
+  const {userId, userName , rtcOffer} = body
 
   if (!userId || !userName) {
     res.sendStatus(constants.HTTP_STATUS_UNAUTHORIZED)
     return
   }
 
-  const meet = await  meetService.createMeet({ userName,userId })
+  const meet = await  meetService.createMeet({ userName, userId , rtcOffer } )
 
   res.send(meet)
 })

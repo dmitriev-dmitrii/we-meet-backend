@@ -17,10 +17,12 @@ const  saveChatMessagesTypes =  [
      meetUsers = new Map();
      meetChatMessages = [];
      meetOwnerId = '';
+     rtcOffer = ''
 
-         constructor({ meetId, meetOwnerId }) {
+         constructor({ meetId, meetOwnerId , rtcOffer }) {
          this.meetId = meetId
          this.meetOwnerId = meetOwnerId
+         this.rtcOffer = rtcOffer
      }
 
    async appendUserToMeet( user ) {
@@ -102,11 +104,12 @@ export const meetService = {
         // const meetId = String( Math.floor(Math.random() * 1000))
         const meetId = String( 123)
 
-        const { userId } = payload
+        const { userId, rtcOffer } = payload
 
         const meet = new Meet ({
             meetId,
             meetOwnerId: userId,
+            rtcOffer,
         })
 
         meetStorage.set( meetId , meet )
