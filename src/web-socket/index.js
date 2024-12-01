@@ -5,15 +5,13 @@ import {usersService} from "../services/users/usersService.js";
 import {meetService} from "../services/meet/meetService.js";
 import { parse } from 'cookie';
 
-const  onSocketConnect = async  (ws , { headers , url } ) => {
-
-    const {cookie = ''} = headers
-
-    const { userId } = parse(cookie)
+const  onSocketConnect = async  (ws , { url } ) => {
 
     const params = new URLSearchParams( url )
 
     const meetId = params.get('meetId')
+    const userId = params.get('userId')
+
 
     const meet =  await meetService.findMeetById(meetId)
 

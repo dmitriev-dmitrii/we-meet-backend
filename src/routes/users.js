@@ -17,20 +17,15 @@ usersRouter.post('/auth',async ({ body = {}, fingerprint }, res)=> {
 
   const user = await  usersService.saveUser({ userName  , userFingerprint } )
 
-  const { userId } =user
-
-  res.cookie('userId', userId, {  httpOnly: true , secure: true , sameSite: 'none'});
 
   res.send(user) //todo user dto
 })
 
-usersRouter.get('/logout',async ({ body = {}, cookies,  fingerprint }, res)=> {
+usersRouter.get('/logout',async ({ body = {}, fingerprint }, res)=> {
 
-  const {userId} = cookies
+  const { userId } = body
 
   const isDeleted = await  usersService.disconnectUser({ userId })
-
-  res.cookie('userId', '', {  httpOnly: true , secure: true , sameSite: 'none'});
 
   res.send({isDeleted})
 })
