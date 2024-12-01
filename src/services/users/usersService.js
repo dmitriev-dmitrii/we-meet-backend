@@ -59,9 +59,13 @@ export const usersService = {
         return null;
     },
 
-    disconnectUser: async (  userId ) => {
-        const {ws} = usersStorage.get(userId)
-        ws.close()
+    disconnectUser: async ({userId}) => {
+        const user = usersStorage.get(userId)
+
+        if (user) {
+            user.ws.close(3000)
+        }
+
         return   usersStorage.delete(userId)
     }
 

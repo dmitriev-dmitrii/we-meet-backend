@@ -28,6 +28,7 @@ const  saveChatMessagesTypes =  [
    async appendUserToMeet( user ) {
 
     const { userId, userName, userIsOnline } = user
+    console.log('appendUserToMeet', userId)
 
     if(!userId || !userName || !userIsOnline ) {
         console.log( (`'appendUserToMeet err','userId:', ${userId} ,'userName',${userName} ,'userIsOnline',${userIsOnline}` ))
@@ -40,7 +41,9 @@ const  saveChatMessagesTypes =  [
            type: MEET_WEB_SOCKET_EVENTS.USER_JOIN_MEET,
            userName,
            userId,
-           text: ` ${userName} USER_JOIN_MEET`
+           data: {
+               text: `${userName} USER_JOIN_MEET`
+           }
     }
 
     await this.broadcastToMeetUsers({ message } )
@@ -50,17 +53,18 @@ const  saveChatMessagesTypes =  [
    async removeUserFromMeet({userId}) {
 
      const user =    this.meetUsers.get(userId)
-       console.log('leave user', userId)
+
         if (! user ) {
              return
         }
 
        const {userName} = user
+
        const message = {
              type: MEET_WEB_SOCKET_EVENTS.USER_LEAVE_MEET,
              userName,
              userId,
-             text: `${userName} USER_LEAVE_MEET`
+             data: { text: `${userName} USER_LEAVE_MEET`}
        }
 
        await this.broadcastToMeetUsers({ senderUserId:userId, message } )

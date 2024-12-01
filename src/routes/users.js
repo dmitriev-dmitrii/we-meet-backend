@@ -4,19 +4,7 @@ import {constants} from "http2";
 
 const usersRouter = Router()
 
-// usersRouter.post('/registration', userRegistration);
-//
-// usersRouter.post('/login',  userLogin );
-//
-// usersRouter.post('/logout',  userLogout);
-//
-// usersRouter.put('/refresh-tokens', updateUserAuthTokens );
-
-// usersRouter.get('/',(req, res)=> {
-//   res.send('users')
-// })
-
-usersRouter.post('/auth',async ({ body, fingerprint }, res)=> {
+usersRouter.post('/auth',async ({ body = {}, fingerprint }, res)=> {
 
   const { userName } = body
 
@@ -36,5 +24,15 @@ usersRouter.post('/auth',async ({ body, fingerprint }, res)=> {
   res.send(user) //todo user dto
 })
 
+usersRouter.get('/logout',async ({ body = {}, cookies,  fingerprint }, res)=> {
+
+  const {userId} = cookies
+
+  const isDeleted = await  usersService.disconnectUser({ userId })
+
+  res.cookie('userId', '', {  httpOnly: true , secure: true , sameSite: 'none'});
+
+  res.send({isDeleted})
+})
 
 export  default  usersRouter;

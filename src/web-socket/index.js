@@ -5,13 +5,23 @@ import {usersService} from "../services/users/usersService.js";
 import {meetService} from "../services/meet/meetService.js";
 import { parse } from 'cookie';
 
-
-const  onSocketConnect = async  (ws , {headers} ) => {
+const  onSocketConnect = async  (ws , { headers , url } ) => {
 
     const {cookie = ''} = headers
+
     const { userId } = parse(cookie)
 
-    await userWebSocketAuth({userId,ws})
+    const params = new URLSearchParams( url )
+
+    const meetId = params.get('meetId')
+
+    const meet =  await meetService.findMeetById(meetId)
+
+    if (!meet) {
+
+    }
+
+    await userWebSocketAuth({ userId, meetId , ws } )
 
     ws.on('message',async (payload) => {
 
@@ -31,7 +41,7 @@ const  onSocketConnect = async  (ws , {headers} ) => {
 
         switch (type) {
             case MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE:
-           await     meetChatMessageHandle(data);
+           await  meetChatMessageHandle(data);
                 break;
          // case MEET_WEB_SOCKET_EVENTS.RTC_ICE_CANDIDATE:
          //        await  onCandidate(data);
@@ -61,7 +71,7 @@ const  onSocketConnect = async  (ws , {headers} ) => {
             await  meet.removeUserFromMeet({ userId })
         }
 
-        await  usersService.disconnectUser(userId);
+        await  usersService.disconnectUser({userId});
     });
 
 }
@@ -73,10 +83,8 @@ async function onCandidate(data) {
     const meet = await meetService.findMeetById(meetId)
 
     if (!meet) {
-            return
+       return
     }
-
-
 
     data.senderUserId = userId
 
@@ -84,19 +92,23 @@ async function onCandidate(data) {
 
 }
 
+async function meetChatMessageHandle(payload) {
 
-async function meetChatMessageHandle({ userName, meetId, userId, text = '' }) {
+    const { meetId, userId, data } = payload
+
     const meet = await meetService.findMeetById(meetId)
 
-    if (!meet || !text) {
+    const user = await  usersService.findUserById(userId)
+
+    const { text } = data
+
+    if (!meet || !text || !user) {
         return
     }
 
-    const message = {
-        type: MEET_WEB_SOCKET_EVENTS.CHAT_MESSAGE,
-        userName,
-        text
-    }
+    const { userName } = user
+
+    const message = {...payload, userName }
 
     await meet.broadcastToMeetUsers({
         message ,
@@ -109,7 +121,7 @@ async function  userWebSocketAuth ( { userId  ,  ws } ) {
 
     if (!user) {
         console.log(`userWebSocketAuth cant find user by id ${userId} : => close ws`)
-        ws.close()
+        ws.close(3000)
         return
     }
 

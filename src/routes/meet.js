@@ -19,16 +19,25 @@ meetRouter.get('/:meetId',async ({params}, res)=> {
     res.send(meet)
 })
 
-meetRouter.post('/create',async ({body}, res)=> {
+meetRouter.post('/create',async ({body,cookies}, res)=> {
 
-  const {userId, userName , rtcOffer} = body
+  // todo брать id из куки
+  const { rtcOffer } = body
 
-  if (!userId || !userName) {
+  const {userId} = cookies
+
+  if (!userId) {
     res.sendStatus(constants.HTTP_STATUS_UNAUTHORIZED)
     return
   }
 
-  const meet = await  meetService.createMeet({ userName, userId , rtcOffer } )
+  if (!rtcOffer) {
+    res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)
+    return
+  }
+
+
+  const meet = await  meetService.createMeet({  userId , rtcOffer } )
 
   res.send(meet)
 })
