@@ -28,11 +28,9 @@ const  saveChatMessagesTypes =  [
    async appendUserToMeet( user ) {
 
     const { userId, userName, userIsOnline } = user
-    console.log('appendUserToMeet', userId)
 
     if(!userId || !userName || !userIsOnline ) {
-        console.log( (`'appendUserToMeet err','userId:', ${userId} ,'userName',${userName} ,'userIsOnline',${userIsOnline}` ))
-        return
+        throw new Error (`'appendUserToMeet err','userId:', ${userId} ,'userName',${userName} ,'userIsOnline',${userIsOnline}` )
     }
 
     this.meetUsers.set( userId , user )

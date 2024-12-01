@@ -3,7 +3,6 @@ import { WebSocket } from 'ws';
 import {MEET_WEB_SOCKET_EVENTS} from "../constatnts/meetWebSocket.js";
 import {usersService} from "../services/users/usersService.js";
 import {meetService} from "../services/meet/meetService.js";
-import { parse } from 'cookie';
 
 const  onSocketConnect = async  (ws , { url } ) => {
 

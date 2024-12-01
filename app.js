@@ -8,10 +8,13 @@ import cors from 'cors'
 import cookieParser from "cookie-parser";
 import Fingerprint from "express-fingerprint";
 import {env} from "./src/constatnts/env.js";
+import { errorMiddleware } from "./src/midlwares/index.js";
+import morgan  from  'morgan';
 
 const {APP_PORT} = env
 
 const app = express();
+app.use(morgan('dev'));
 app.use(cors({
     origin: ['https://dmitriev-dmitrii.github.io','http://localhost:3003'],
     credentials: true,
@@ -26,7 +29,7 @@ const webSocketServer = new WebSocketServer({ server });
 
 setupRoutes(app);
 setupWebSocket(webSocketServer);
-
+app.use(errorMiddleware)
 
 server.listen(APP_PORT, () => {
     console.log(`app listen : http://localhost:${APP_PORT}/`);
