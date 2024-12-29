@@ -3,6 +3,7 @@ import { constants } from "http2";
 const meetRouter = Router()
 import {meetService} from "../services/meet/meetService.js";
 import {usersService} from "../services/users/usersService.js";
+import {MeetDto} from "../services/meet/MeetDto.js";
 
 meetRouter.get('/:meetId',async ({params}, res)=> {
 
@@ -21,8 +22,7 @@ meetRouter.get('/:meetId',async ({params}, res)=> {
 
 meetRouter.post('/create',async ({body}, res)=> {
 
-  const { rtcOffer , userId } = body
-
+  const {userId } = body
 
 
   if (!userId) {
@@ -30,13 +30,8 @@ meetRouter.post('/create',async ({body}, res)=> {
     return
   }
 
-  if (!rtcOffer) {
-    res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)
-    return
-  }
 
-
-  const meet = await  meetService.createMeet({  userId , rtcOffer } )
+  const meet = await  meetService.createMeet({  userId  } )
 
   res.send(meet)
 })
@@ -73,7 +68,8 @@ try {
 
   // todo meet dto
 
-  res.send(meet)
+
+  res.send( new MeetDto( meet) )
 
 }catch (e) {
   console.log('/join-request', e )

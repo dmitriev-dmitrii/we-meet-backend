@@ -17,12 +17,10 @@ const  saveChatMessagesTypes =  [
      meetUsers = new Map();
      meetChatMessages = [];
      meetOwnerId = '';
-     rtcOffer = ''
 
-         constructor({ meetId, meetOwnerId , rtcOffer }) {
+         constructor({ meetId, meetOwnerId  }) {
          this.meetId = meetId
          this.meetOwnerId = meetOwnerId
-         this.rtcOffer = rtcOffer
      }
 
    async appendUserToMeet( user ) {
@@ -35,7 +33,7 @@ const  saveChatMessagesTypes =  [
 
     this.meetUsers.set( userId , user )
 
-    const message = {
+    const payload = {
            type: MEET_WEB_SOCKET_EVENTS.USER_JOIN_MEET,
            userName,
            userId,
@@ -44,7 +42,7 @@ const  saveChatMessagesTypes =  [
            }
     }
 
-    await this.broadcastToMeetUsers({ message } )
+    await this.broadcastToMeetUsers( payload )
 
    }
 
@@ -58,26 +56,33 @@ const  saveChatMessagesTypes =  [
 
        const {userName} = user
 
-       const message = {
+       const payload = {
              type: MEET_WEB_SOCKET_EVENTS.USER_LEAVE_MEET,
              userName,
              userId,
              data: { text: `${userName} USER_LEAVE_MEET`}
        }
 
-       await this.broadcastToMeetUsers({ senderUserId:userId, message } )
+       await this.broadcastToMeetUsers( payload , userId )
 
    }
 
-    async broadcastToMeetUsers({ senderUserId = '', message = {} }) {
+    async broadcastToMeetUsers(payload , senderUserId = '') {
 
-        const { type , userName } = message
-        message.createdAt = Date.now()
 
-        const payload = JSON.stringify(message)
+
+        const { type , userName , createdAt } = payload
+
+
+        if (!createdAt) {
+            payload.createdAt = Date.now()
+        }
+
+
+        const msg = JSON.stringify(payload)
 
         if (saveChatMessagesTypes.includes( type )) {
-            this.meetChatMessages.push(message)
+            this.meetChatMessages.push(payload)
         }
 
         for (const user of this.meetUsers.values()) {
@@ -88,12 +93,12 @@ const  saveChatMessagesTypes =  [
             //если нужно исключить отправителя из отправки, передать userId в поле senderUserId
 
             if ( !user.userIsOnline && isRepeatToSender ) {
-                console.warn(` ${user.userName} Is not Online`, user.userIsOnline  ,'message', message );
+                console.warn(` ${user.userName} Is not Online`, user.userIsOnline  ,'message', payload);
             }
 
             if ( isRepeatToSender && user.userIsOnline ) {
                 try {
-                     user.ws.send(payload);
+                     user.ws.send(msg);
                 } catch (error) {
                     console.error('Failed to send message: to user' , user.name , error );
                 }
@@ -101,6 +106,41 @@ const  saveChatMessagesTypes =  [
 
         }
     }
+
+
+
+     async wispToMeetUser(payload , wispUserId = '') {
+
+         const { type , userName , createdAt } = payload
+
+         if ( !wispUserId ) {
+             console.warn(`wispUserId  is  ${wispUserId} `);
+             return
+         }
+
+         if (!createdAt) {
+             payload.createdAt = Date.now()
+         }
+
+         const msg = JSON.stringify(payload)
+
+
+         for (const user of this.meetUsers.values()) {
+
+             if (  user.userIsOnline && wispUserId === user.userId ) {
+                 try {
+                     user.ws.send(msg);
+                 } catch (error) {
+                     console.error('Failed to send message: to user' , user.name , error );
+                 }
+
+                 break
+             }
+
+         }
+     }
+
+
  }
 
 export const meetService = {
@@ -110,12 +150,11 @@ export const meetService = {
         // const meetId = String( Math.floor(Math.random() * 1000))
         const meetId = String( 123)
 
-        const { userId, rtcOffer } = payload
+        const { userId } = payload
 
         const meet = new Meet ({
             meetId,
             meetOwnerId: userId,
-            rtcOffer,
         })
 
         meetStorage.set( meetId , meet )
