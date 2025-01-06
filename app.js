@@ -1,4 +1,4 @@
-
+import {env} from "./src/constatnts/env.js";
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -7,7 +7,6 @@ import {setupWebSocket} from "./src/web-socket/index.js";
 import cors from 'cors'
 import cookieParser from "cookie-parser";
 import Fingerprint from "express-fingerprint";
-import {env} from "./src/constatnts/env.js";
 import { errorMiddleware } from "./src/midlwares/index.js";
 import morgan  from  'morgan';
 
@@ -29,8 +28,8 @@ const webSocketServer = new WebSocketServer({ server });
 
 setupRoutes(app);
 setupWebSocket(webSocketServer);
-app.use(errorMiddleware)
 
+app.use( errorMiddleware )
 server.listen(APP_PORT, () => {
     console.log(`app listen : http://localhost:${APP_PORT}/`);
 });
