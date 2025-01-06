@@ -2,8 +2,21 @@ import { Router } from "express";
 import { constants } from "http2";
 const meetRouter = Router()
 import {meetService} from "../services/meet/meetService.js";
-import {usersService} from "../services/users/usersService.js";
-import {MeetDto} from "../services/meet/MeetDto.js";
+import {MeetDto} from "../services/meet/dto/MeetDto.js";
+
+meetRouter.post('/create',async ({body}, res)=> {
+
+  const { userName , isPrivateMeet } = body
+
+  if (!userName) {
+    res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
+    return
+  }
+
+  const meet = await  meetService.createMeet( body )
+
+  res.send(new MeetDto(meet))
+})
 
 meetRouter.get('/:meetId',async ({params}, res)=> {
 
@@ -16,65 +29,52 @@ meetRouter.get('/:meetId',async ({params}, res)=> {
     return
   }
 
-    // todo meet dto
-    res.send(meet)
+  res.send( new MeetDto( meet ) )
 })
 
-meetRouter.post('/create',async ({body}, res)=> {
 
-  const {userId } = body
+meetRouter.post('/:meetId/join-request',async ({body, params, fingerprint }, res)=> {
+  try {
+    const { meetId } = params
+    const { userName } = body
+
+    if (!userName) {
+      res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
+      return
+    }
+
+    const meet = await meetService.findMeetById(meetId)
+
+    if (!meet) {
+      // TODO create meet
+      res.sendStatus( constants.HTTP_STATUS_NOT_FOUND )
+      return
+    }
+    //
+    // const user = await usersService.findUserById(userId)
+    //
+    // if (!user) {
+    //   console.log('/join-request cant find user by id ', userId )
+    //   res.sendStatus( constants.HTTP_STATUS_UNAUTHORIZED )
+    //   return
+    // }
+
+    // await meet.joinUserToMeet(user)
+
+    // todo feature запрос на вход в встречу от юзера
+    //  console.log( 'user' , user )
 
 
-  if (!userId) {
-    res.sendStatus(constants.HTTP_STATUS_UNAUTHORIZED)
-    return
+   const user =  await  meet.appendUserToMeet({ userName, fingerprint })
+
+
+
+    res.send({...new MeetDto(meet) , user } )
+
+  } catch (e) {
+    console.log('/join-request', e )
+    res.send(e)
   }
-
-
-  const meet = await  meetService.createMeet({  userId  } )
-
-  res.send(meet)
-})
-
-meetRouter.post('/join-request',async ({body }, res)=> {
-try {
-
-  const {meetId , userId} = body
-
-
-  const meet = await meetService.findMeetById(meetId)
-
-  if (!meet) {
-    // TODO create meet
-    res.sendStatus( constants.HTTP_STATUS_NOT_FOUND )
-    return
-
-  }
-
-  const user = await usersService.findUserById(userId)
-
-  if (!user) {
-    console.log('/join-request cant find user by id ', userId )
-    res.sendStatus( constants.HTTP_STATUS_UNAUTHORIZED )
-    return
-  }
-
-  await meet.appendUserToMeet(user)
-
-  user.setMeetId(meet.meetId)
-
-  // todo feature запрос на вход в встречу от юзера
-  //  console.log( 'user' , user )
-
-  // todo meet dto
-
-
-  res.send( new MeetDto( meet) )
-
-}catch (e) {
-  console.log('/join-request', e )
-  res.send(e)
-}
 })
 
 
