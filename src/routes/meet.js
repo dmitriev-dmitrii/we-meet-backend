@@ -6,9 +6,9 @@ import {MeetDto} from "../services/meet/dto/MeetDto.js";
 
 meetRouter.post('/create',async ({body}, res)=> {
 
-  const { userName , isPrivateMeet } = body
+  const { userName='' ,  userId='' , password='' } = body
 
-  if (!userName) {
+  if (!userId) {
     res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
     return
   }
@@ -36,17 +36,17 @@ meetRouter.get('/:meetId',async ({params}, res)=> {
 meetRouter.post('/:meetId/join-request',async ({body, params, fingerprint }, res)=> {
   try {
     const { meetId } = params
-    const { userName } = body
+    const { userName, userId } = body
 
-    if (!userName) {
+    if (!userName || !userId) {
       res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
       return
     }
 
     const meet = await meetService.findMeetById(meetId)
 
+
     if (!meet) {
-      // TODO create meet
       res.sendStatus( constants.HTTP_STATUS_NOT_FOUND )
       return
     }
@@ -65,11 +65,11 @@ meetRouter.post('/:meetId/join-request',async ({body, params, fingerprint }, res
     //  console.log( 'user' , user )
 
 
-   const user =  await  meet.appendUserToMeet({ userName, fingerprint })
+   // const user =  await  meet.appendUserToMeet({ userName, fingerprint })
 
+    // res.send({...new MeetDto(meet) , user } )
+    res.send({...new MeetDto(meet)  } )
 
-
-    res.send({...new MeetDto(meet) , user } )
 
   } catch (e) {
     console.log('/join-request', e )

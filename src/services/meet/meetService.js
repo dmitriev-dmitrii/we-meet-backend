@@ -1,6 +1,4 @@
-import {WebSocket} from "ws";
 import {Meet} from "./endtites/Meet.js";
-import {User} from "./endtites/User.js";
 const meetStorage = new Map();
 
 export const meetService = {

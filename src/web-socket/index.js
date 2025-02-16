@@ -11,7 +11,7 @@ async  function  onSocketConnect ( ws , { url  , headers } )  {
         ws._meetId =  params.searchParams.get('meetId')
 
         if ( !ws._userId || !ws._meetId ) {
-            ws.close()
+            ws.close(3000)
         }
 
         const payload = {

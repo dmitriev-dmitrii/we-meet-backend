@@ -1,12 +1,10 @@
 export class MeetDto {
     meetId  = ''
-    meetOwnerId = ''
     meetUsers = []
 
 
-    constructor({ meetUsers , meetId ,  meetOwnerId }) {
+    constructor({ meetUsers , meetId }) {
         this.meetId = meetId
-        this.meetOwnerId = meetOwnerId
         this.meetUsers =  Array.from(meetUsers.values());
     }
 }
