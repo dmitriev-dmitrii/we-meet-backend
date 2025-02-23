@@ -1,6 +1,7 @@
 import { WebSocket } from 'ws';
 
 import {meetService} from "../services/meet/meetService.js";
+import {usersService} from "../services/user/usersService.js";
 
 
 async  function  onSocketConnect ( ws , { url  , headers } )  {
@@ -10,7 +11,10 @@ async  function  onSocketConnect ( ws , { url  , headers } )  {
         ws._userId =  params.searchParams.get('userId')
         ws._meetId =  params.searchParams.get('meetId')
 
-        if ( !ws._userId || !ws._meetId ) {
+        ws._user = await usersService.findUserById( ws._userId )
+        // ws._user = await usersService.findUserById( ws._userId )
+
+        if ( !ws._user || !ws._meetId ) {
             ws.close(3000)
         }
 
@@ -31,6 +35,7 @@ async  function  onSocketConnect ( ws , { url  , headers } )  {
 
             let data = JSON.parse(payload);
             data.from = ws._userId;
+            data.user = ws._user;
 
             if (data.to) {
                 const targetWsUser = [...this.webSocketServer.clients].find((item) => item._userId === data.to);

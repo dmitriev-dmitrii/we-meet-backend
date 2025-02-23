@@ -7,7 +7,8 @@ export  class Meet {
     isPrivateMeet =  false;
     password = ''
     constructor( { password='' } ) {
-        this.meetId = String(Date.now()) //todo generate id
+        // this.meetId = String(Date.now()) //todo generate id
+        this.meetId = '123'
         this.isPrivateMeet = Boolean(password)
         this.password = password
     }
