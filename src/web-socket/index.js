@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
 
-import {meetService} from "../services/meet/meetService.js";
 import {usersService} from "../services/user/usersService.js";
-
+// TODO отправлять сокеты только по юзерам meet
+// TODO удалять встречу если никого нет
 
 async  function  onSocketConnect ( ws , { url  , headers } )  {
 

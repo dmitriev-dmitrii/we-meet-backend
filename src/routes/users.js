@@ -4,7 +4,7 @@ const usersRouter = Router()
 
 import {usersService} from "../services/user/usersService.js";
 
-usersRouter.post('/auth', async ({body, fingerprint}, res) => {
+usersRouter.post('/auth', async ({body= {}, fingerprint}, res) => {
 
     const {userName = '', } = body
 

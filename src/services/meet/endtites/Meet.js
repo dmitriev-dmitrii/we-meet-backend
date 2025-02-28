@@ -2,15 +2,17 @@
 
 export  class Meet {
     meetId = '';
+    ownerUserId = ''
     meetUsers = new Map();
 
     isPrivateMeet =  false;
     password = ''
-    constructor( { password='' } ) {
+    constructor( { password='' , userId='' } ) {
         // this.meetId = String(Date.now()) //todo generate id
         this.meetId = '123'
         this.isPrivateMeet = Boolean(password)
         this.password = password
+        this.ownerUserId = userId
     }
 
     // appendUserToMeet = async (newUserPayload) => {
