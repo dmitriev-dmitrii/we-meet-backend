@@ -10,7 +10,8 @@ export class User {
         const {useragent} = components
 
         this.userName = userName ?  userName : hash //todo random animals name
+        this.userAccentColor = '' //todo uniq accent color
 
-        this.userId = `[${useragent.browser.family}-${useragent.browser.version}][${useragent.os.family}][${hash}]`.trim().toLowerCase();
+        this.userId = `[${useragent.os.family}][${useragent.browser.family}-${useragent.browser.version}][${hash}]`.trim().toLowerCase();
     }
 }

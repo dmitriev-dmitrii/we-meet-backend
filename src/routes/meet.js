@@ -4,7 +4,7 @@ const meetRouter = Router()
 import {meetService} from "../services/meet/meetService.js";
 import {MeetDto} from "../services/meet/dto/MeetDto.js";
 
-meetRouter.post('/create',async ({body}, res)=> {
+meetRouter.post('/create',async ({body={}}, res)=> {
 
   const { userName='' ,  userId='' , password='' } = body
 

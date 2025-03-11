@@ -1,12 +1,14 @@
 import {Router} from "express";
+
 const usersRouter = Router()
 
-import {User} from "../services/user/endtites/User.js";
-usersRouter.post('/auth', async ({body, fingerprint}, res) => {
+import {usersService} from "../services/user/usersService.js";
 
-    const {userName = '',} = body
+usersRouter.post('/auth', async ({body= {}, fingerprint}, res) => {
 
-    const user = new User({fingerprint, userName})
+    const {userName = '', } = body
+
+    const user = await usersService.createUser({fingerprint, userName})
 
     res.send(user)
 })

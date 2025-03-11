@@ -1,17 +1,20 @@
-import {WebSocket} from "ws";
-import {Meet} from "./endtites/Meet.js";
+
 import {User} from "./endtites/User.js";
-// const meetStorage = new Map();
+const usersStorage = new Map();
 
 export const usersService = {
 
-    // createMeet : async (payload)=> {
-    //
-    //     const meet = new Meet ( payload )
-    //
-    //     meetStorage.set( meet.meetId , meet )
-    //
-    //     return   meetStorage.get( meet.meetId )
-    // },
+    createUser : async (payload)=> {
+
+        const user = new User ( payload )
+
+        usersStorage.set( user.userId ,user )
+
+        return   usersStorage.get(  user.userId  )
+    },
+
+    findUserById : async  (userId)=> {
+      return   usersStorage.get( userId )
+    }
 
 }
