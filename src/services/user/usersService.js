@@ -15,6 +15,10 @@ export const usersService = {
 
     findUserById : async  (userId)=> {
       return   usersStorage.get( userId )
+    },
+
+    deleteUserById : async  (userId)=> {
+        return   usersStorage.delete( userId )
     }
 
 }

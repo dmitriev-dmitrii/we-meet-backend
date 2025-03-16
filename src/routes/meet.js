@@ -1,81 +1,74 @@
-import { Router } from "express";
-import { constants } from "http2";
+import {Router} from "express";
+import {constants} from "http2";
+
 const meetRouter = Router()
 import {meetService} from "../services/meet/meetService.js";
 import {MeetDto} from "../services/meet/dto/MeetDto.js";
+import {usersService} from "../services/user/usersService.js";
 
-meetRouter.post('/create',async ({body={}}, res)=> {
+meetRouter.post('/create', async ({body = {}}, res) => {
 
-  const { userName='' ,  userId='' , password='' } = body
+    const {userName = '', userId = '', password = ''} = body
 
-  if (!userId) {
-    res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
-    return
-  }
-
-  const meet = await  meetService.createMeet( body )
-
-  res.send(new MeetDto(meet))
-})
-
-meetRouter.get('/:meetId',async ({params}, res)=> {
-
-  const {meetId} = params
-
-  const meet = await  meetService.findMeetById(meetId)
-
-  if (!meet) {
-    res.sendStatus(constants.HTTP_STATUS_NOT_FOUND)
-    return
-  }
-
-  res.send( new MeetDto( meet ) )
-})
-
-
-meetRouter.post('/:meetId/join-request',async ({body, params, fingerprint }, res)=> {
-  try {
-    const { meetId } = params
-    const { userName, userId } = body
-
-    if (!userName || !userId) {
-      res.sendStatus( constants.HTTP_STATUS_BAD_REQUEST )
-      return
+    if (!userId) {
+        res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)
+        return
     }
+
+    const meet = await meetService.createMeet(body)
+
+    res.send(new MeetDto(meet))
+})
+
+meetRouter.get('/:meetId', async ({params}, res) => {
+
+    const {meetId} = params
 
     const meet = await meetService.findMeetById(meetId)
 
-
     if (!meet) {
-      res.sendStatus( constants.HTTP_STATUS_NOT_FOUND )
-      return
+        res.sendStatus(constants.HTTP_STATUS_NOT_FOUND)
+        return
     }
-    //
-    // const user = await usersService.findUserById(userId)
-    //
-    // if (!user) {
-    //   console.log('/join-request cant find user by id ', userId )
-    //   res.sendStatus( constants.HTTP_STATUS_UNAUTHORIZED )
-    //   return
-    // }
 
-    // await meet.joinUserToMeet(user)
-
-    // todo feature запрос на вход в встречу от юзера
-    //  console.log( 'user' , user )
-
-
-   // const user =  await  meet.appendUserToMeet({ userName, fingerprint })
-
-    // res.send({...new MeetDto(meet) , user } )
-    res.send({...new MeetDto(meet)  } )
-
-
-  } catch (e) {
-    console.log('/join-request', e )
-    res.send(e)
-  }
+    res.send(new MeetDto(meet))
 })
 
 
-export  default  meetRouter;
+meetRouter.post('/:meetId/join-request', async ({body, params, fingerprint}, res) => {
+    try {
+        const {meetId} = params
+        const {userId} = body
+
+        if (!userId) {
+            res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)
+            return
+        }
+
+        const meet = await meetService.findMeetById(meetId)
+
+
+        if (!meet) {
+            res.sendStatus(constants.HTTP_STATUS_NOT_FOUND)
+            return
+        }
+
+        const user = await usersService.findUserById(userId)
+
+        user.isOwner = meet.ownerUserId === user.userId
+        user.meetId = meet.meetId
+
+        // todo feature запрос на вход в встречу от юзера
+        //  console.log( 'user' , user )
+
+        res.send({...new MeetDto(meet)})
+
+
+    } catch (e) {
+        console.log('/join-request', e)
+        res.send(e)
+    }
+})
+
+
+export default meetRouter;
