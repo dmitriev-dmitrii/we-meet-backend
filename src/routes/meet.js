@@ -1,11 +1,11 @@
 import {Router} from "express";
 import {constants} from "http2";
-
-const meetRouter = Router()
 import {meetService} from "../services/meet/meetService.js";
 import {MeetDto} from "../services/meet/dto/MeetDto.js";
 import {usersService} from "../services/user/usersService.js";
 
+
+export const meetRouter = Router()
 meetRouter.post('/create', async ({body = {}}, res) => {
 
     const {userName = '', userId = '', password = ''} = body
@@ -71,4 +71,3 @@ meetRouter.post('/:meetId/join-request', async ({body, params, fingerprint}, res
 })
 
 
-export default meetRouter;
