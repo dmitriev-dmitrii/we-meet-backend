@@ -10,7 +10,7 @@ import Fingerprint from "express-fingerprint";
 import { errorMiddleware } from "./src/midlwares/index.js";
 import morgan  from  'morgan';
 
-const {APP_PORT} = env
+const {APP_PORT, MODE , APP_NAME } = env
 
 const app = express();
 app.use(morgan('dev'));
@@ -31,5 +31,6 @@ setupWebSocket(webSocketServer);
 
 app.use( errorMiddleware )
 server.listen(APP_PORT, () => {
+    console.log(APP_NAME + ' MODE : '+ MODE)
     console.log(`app listen : http://localhost:${APP_PORT}/`);
 });
