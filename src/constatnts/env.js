@@ -1,12 +1,13 @@
 import dotenv from 'dotenv'
 
-const { parsed } = dotenv.config()
+dotenv.config()
 
-const IS_PROD_MODE = parsed.MODE === 'production'
-const IS_DEV_MODE = parsed.MODE === 'development'
+const IS_PROD_MODE =  process.env.MODE  === 'production';
+const IS_DEV_MODE = !IS_PROD_MODE;
+
 export const env = {
+    ...process.env,
     IS_PROD_MODE,
     IS_DEV_MODE,
-    ...parsed
 }
 

@@ -31,6 +31,7 @@ setupWebSocket(webSocketServer);
 
 app.use( errorMiddleware )
 server.listen(APP_PORT, () => {
+    console.log(process.env)
     console.log(APP_NAME + ' MODE : '+ MODE)
     console.log(`app listen : http://localhost:${APP_PORT}/`);
 });
