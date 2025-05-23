@@ -1,9 +1,14 @@
 import {Router} from "express";
 import {usersService} from "../services/user/usersService.js";
 import {env} from "../constatnts/env.js";
-import freeice from "freeice";
+import freeIce from "freeice";
 
-
+const GOOGLE_ICES = [
+    {urls: "stun:stun.l.google.com:19302"}, // Обязательно для Firefox
+    {urls: "stun:stun1.l.google.com:19302"},
+    { urls: "stun:stun2.l.google.com:19302" },
+    { urls: "stun:stun3.l.google.com:19302" }
+]
 export const usersRouter = Router()
 
 const {METERED_API_KEY, IS_DEV_MODE} = env
@@ -18,8 +23,10 @@ usersRouter.post('/auth', async ({body = {}, fingerprint}, res) => {
 
 usersRouter.get('/ice-servers', async (req, res) => {
 
+    const freeIces = [ ...GOOGLE_ICES, ...freeIce()]
+
     if (IS_DEV_MODE) {
-        res.send(freeice())
+        res.send(freeIces)
         return
     }
 
@@ -27,6 +34,6 @@ usersRouter.get('/ice-servers', async (req, res) => {
 
     const iceServers = await metredApiRes.json();
 
-    res.send(iceServers)
+    res.send([...iceServers, ...freeIces])
 })
 
