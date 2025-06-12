@@ -6,6 +6,7 @@ import {UserDto} from "../services/user/dto/UserDto.js";
 // TODO отправлять сокеты только по юзерам meet
 // TODO удалять встречу если никого нет
 
+
 async function onSocketConnect(ws, {url, headers}) {
 
     const params = new URL(url, `https://${headers.host}`)

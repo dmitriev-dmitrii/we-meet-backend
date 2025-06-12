@@ -4,7 +4,7 @@ import {meetService} from "../services/meet/meetService.js";
 import {MeetDto} from "../services/meet/dto/MeetDto.js";
 import {usersService} from "../services/user/usersService.js";
 
-
+// TODO ручку на получение списка meets
 export const meetRouter = Router()
 meetRouter.post('/create', async ({body = {}}, res) => {
 
