@@ -20,25 +20,6 @@ async function onSocketConnect(ws, {url, headers}) {
         ws.close(3000)
     }
 
-    const meetWsClients = [...this.webSocketServer.clients.values()].filter((client) => {
-        return client._meetId === ws._meetId && client._user !== ws._user
-    });
-
-  const meetOnlineUsers =   meetWsClients.map(({_user})=> new UserDto(_user))
-
-    const payload = {
-        type: '1',
-        fromUser : ws._user,
-        data: {
-            meetOnlineUsers ,
-        }
-    }
-
-    meetWsClients.forEach((client) => {
-        client.send(JSON.stringify(payload));
-    });
-
-
     ws.on('message', (payload) => {
 
         let data = JSON.parse(payload);
@@ -85,7 +66,7 @@ async function onSocketConnect(ws, {url, headers}) {
             client.send(JSON.stringify(payload));
         });
 
-        usersService.deleteUserById(ws._user.userId)
+        usersService.deleteUserById(ws._user?.userId)
 
     });
 
