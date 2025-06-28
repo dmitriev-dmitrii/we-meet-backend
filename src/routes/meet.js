@@ -8,7 +8,7 @@ import {usersService} from "../services/user/usersService.js";
 export const meetRouter = Router()
 meetRouter.post('/create', async ({body = {}}, res) => {
 
-    const {userName = '', userId = '', password = ''} = body
+    const { userId = '', password = ''} = body
 
     if (!userId) {
         res.sendStatus(constants.HTTP_STATUS_BAD_REQUEST)

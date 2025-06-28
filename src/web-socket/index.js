@@ -2,6 +2,7 @@ import {WebSocket} from 'ws';
 
 import {usersService} from "../services/user/usersService.js";
 import {UserDto} from "../services/user/dto/UserDto.js";
+import {meetService} from "../services/meet/meetService.js";
 
 // TODO отправлять сокеты только по юзерам meet
 // TODO удалять встречу если никого нет
@@ -19,6 +20,26 @@ async function onSocketConnect(ws, {url, headers}) {
     if (!ws._user || !ws._meetId) {
         ws.close(3000)
     }
+
+    const meetUsers = []
+    for (const item of Array.from(this.webSocketServer.clients)) {
+        const user = await usersService.findUserById(item._user.userId)
+        meetUsers.push(new UserDto(user))
+    }
+
+    const onlineMeetUsers = JSON.stringify({
+        type: '1',
+        fromUser: ws._user,
+        data: {
+             meetUsers
+        }
+    })
+
+    this.webSocketServer.clients.forEach((client) => {
+        if (client !== ws && client._meetId === ws._meetId && client.readyState === WebSocket.OPEN) {
+            client.send(onlineMeetUsers);
+        }
+    });
 
     ws.on('message', (payload) => {
 
@@ -47,32 +68,32 @@ async function onSocketConnect(ws, {url, headers}) {
 
     ws.on('close', () => {
 
-        const meetWsClients = [...this.webSocketServer.clients.values()].filter((client) => {
-            return client._meetId === ws._meetId
-        });
-
-        const meetOnlineUsers =   meetWsClients.map(({_user})=> new UserDto(_user))
-
-        const payload = {
+        const payload = JSON.stringify({
             type: '2',
-            fromUser : ws._user,
-            data: {
-                meetOnlineUsers ,
+            fromUser: ws._user,
+            data: {}
+        })
+
+
+        this.webSocketServer.clients.forEach((client) => {
+            if (client !== ws && client._meetId === ws._meetId && client.readyState === WebSocket.OPEN) {
+                client.send(payload);
             }
-        }
-
-
-        meetWsClients.forEach((client) => {
-            client.send(JSON.stringify(payload));
         });
 
-        usersService.deleteUserById(ws._user?.userId)
+        const isEmtyMeet = !Array.from(this.webSocketServer.clients).filter((client)=>{
+            return    client._meetId === ws._meetId
+        }).length
 
+        usersService.deleteUserById(ws._user.userId)
+
+        if ( isEmtyMeet ) {
+            meetService.removeMeet(ws._user._meetId)
+        }
     });
 
 }
 
 export const setupWebSocket = (webSocketServer) => {
     webSocketServer.on('connection', onSocketConnect.bind({webSocketServer}));
-
 }

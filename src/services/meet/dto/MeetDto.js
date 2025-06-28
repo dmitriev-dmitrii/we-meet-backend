@@ -1,6 +1,6 @@
 export class MeetDto {
     meetId  = ''
-    meetUsers = []
+    // meetUsers = []
     ownerUserId = ''
 
     constructor({ meetUsers , meetId , ownerUserId }) {

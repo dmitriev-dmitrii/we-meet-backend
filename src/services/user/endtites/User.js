@@ -3,6 +3,7 @@ export class User {
     userName = ''
     isMeetOwner = false
     meetId = ''
+    userAccentColor = ''
 
     constructor({userName = '', fingerprint = {}}) {
 
