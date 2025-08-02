@@ -41,6 +41,14 @@ async function onSocketConnect(ws, {url, headers}) {
         }
     });
 
+
+    const pingPongInterval = setInterval(() => {
+        // костыль чтобы nginx не закрывал ws
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.ping();
+        }
+    }, 30000);
+
     ws.on('message', (payload) => {
 
         let data = JSON.parse(payload);
@@ -68,6 +76,8 @@ async function onSocketConnect(ws, {url, headers}) {
 
     ws.on('close', () => {
 
+        clearInterval(pingPongInterval);
+        
         const payload = JSON.stringify({
             type: '2',
             fromUser: ws._user,
@@ -92,6 +102,7 @@ async function onSocketConnect(ws, {url, headers}) {
         }
     });
 
+    
 }
 
 export const setupWebSocket = (webSocketServer) => {
