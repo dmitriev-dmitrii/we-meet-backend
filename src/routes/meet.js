@@ -36,7 +36,7 @@ meetRouter.get('/:meetId', async ({params}, res) => {
     if (!meet) {
         throw new AppError({
             status: constants.HTTP_STATUS_NOT_FOUND,
-            message: `Not Found meetId: ${meetId}`
+            message: `Not Found MeetId: ${meetId}`
         })
     }
 
