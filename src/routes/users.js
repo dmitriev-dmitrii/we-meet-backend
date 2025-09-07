@@ -35,6 +35,11 @@ usersRouter.get('/ice-servers', async (req, res) => {
 
     const iceServers = await metredApiRes.json();
 
-    res.send([...iceServers, ...freeIces])
+    if (iceServers.length) {
+        res.send(iceServers)
+        return
+    }
+
+    res.send(freeIces)
 })
 
