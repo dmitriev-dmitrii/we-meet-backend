@@ -7,8 +7,9 @@ import {setupWebSocket} from "./src/web-socket/index.js";
 import cors from 'cors'
 import cookieParser from "cookie-parser";
 import Fingerprint from "express-fingerprint";
-import { errorMiddleware } from "./src/midlwares/index.js";
+
 import morgan  from  'morgan';
+import {errorMiddleware} from "./src/midlwares/errorMiddlware.js";
 
 const {APP_PORT, MODE , APP_NAME, IS_DEV_MODE } = env
 
@@ -17,11 +18,11 @@ app.use(morgan('dev'));
 app.use(cors({
     origin: ['https://dmitriev-dmitrii.github.io','http://localhost:3003'],
     credentials: true,
-}))
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(Fingerprint())
+app.use(Fingerprint());
 
 const server = http.createServer(app);
 const webSocketServer = new WebSocketServer({ server });
@@ -29,7 +30,7 @@ const webSocketServer = new WebSocketServer({ server });
 setupRoutes(app);
 setupWebSocket(webSocketServer);
 
-app.use( errorMiddleware )
+app.use( errorMiddleware );
 server.listen(APP_PORT, () => {
     console.log(APP_NAME + ' IS_DEV_MODE : '+ IS_DEV_MODE)
     console.log(`app listen : http://localhost:${APP_PORT}/`);
