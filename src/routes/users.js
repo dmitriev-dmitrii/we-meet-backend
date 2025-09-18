@@ -31,10 +31,23 @@ usersRouter.get('/ice-servers', async (req, res) => {
         return
     }
 
+    const iceServers = [
+        {
+            urls: [
+                `turn:${process.env.TURN_PUBLIC_IP}:${process.env.TURN_PORT_UDP}`,
+                `turns:${process.env.TURN_PUBLIC_IP}:${process.env.TURN_PORT_TLS}`
+            ],
+            username: process.env.TURN_USERNAME,
+            credential: process.env.TURN_PASSWORD
+        }
+    ];
+
+    res.send(iceServers)
+
     const metredApiRes = await fetch(`https://we_meet.metered.live/api/v1/turn/credentials?apiKey=${METERED_API_KEY}`)
 
-    const iceServers = await metredApiRes.json();
+    const metredIceServers = await metredApiRes.json();
 
-    res.send([...iceServers, ...freeIces])
+    res.send([...metredIceServers, ...freeIces])
 })
 

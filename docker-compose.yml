@@ -1,10 +1,10 @@
 services:
-  app:
+  we-meet-backend:
     env_file: ./.env
-    container_name: ${APP_NAME}
+    container_name: we-meet-backend
     restart: always
     ports:
-      - ${APP_PORT}:${APP_PORT}
+      - ${BACKEND_APP_PORT}:${BACKEND_APP_PORT}
     build:
       context: ./
     volumes:
