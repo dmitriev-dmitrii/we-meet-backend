@@ -11,7 +11,7 @@ import Fingerprint from "express-fingerprint";
 import morgan  from  'morgan';
 import {errorMiddleware} from "./src/midlwares/errorMiddlware.js";
 
-const {APP_PORT, MODE , APP_NAME, IS_DEV_MODE } = env
+const {BACKEND_APP_PORT, MODE , APP_NAME, IS_DEV_MODE } = env
 
 const app = express();
 app.use(morgan('dev'));
@@ -31,7 +31,7 @@ setupRoutes(app);
 setupWebSocket(webSocketServer);
 
 app.use( errorMiddleware );
-server.listen(APP_PORT, () => {
+server.listen(BACKEND_APP_PORT, () => {
     console.log(APP_NAME + ' IS_DEV_MODE : '+ IS_DEV_MODE)
-    console.log(`app listen : http://localhost:${APP_PORT}/`);
+    console.log(`app listen : http://localhost:${BACKEND_APP_PORT}/`);
 });
