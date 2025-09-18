@@ -1,15 +1,13 @@
-FROM node:20
+FROM node:24:alpine
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the application files into the working directory
-COPY . /app
+COPY package*.json ./
 
-# Install the application dependencies
 RUN npm ci
+
+COPY . /app
 
 EXPOSE 3000
 
-# Define the entry point for the container
-CMD ["npm", "run" ,"start"]
+CMD ["npm", "run", "start"]
