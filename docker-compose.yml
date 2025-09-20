@@ -1,6 +1,6 @@
 services:
   we-meet-backend:
-    env_file: ./.env
+    env_file: .env
     container_name: we-meet-backend
     restart: always
     ports:

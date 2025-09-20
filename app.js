@@ -32,6 +32,6 @@ setupWebSocket(webSocketServer);
 
 app.use( errorMiddleware );
 server.listen(BACKEND_APP_PORT, () => {
-    console.log(APP_NAME + ' IS_DEV_MODE : '+ IS_DEV_MODE)
+    console.log('IS_DEV_MODE : '+ IS_DEV_MODE)
     console.log(`app listen : http://localhost:${BACKEND_APP_PORT}/`);
 });
