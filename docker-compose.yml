@@ -10,3 +10,8 @@ services:
     volumes:
       - ./src:/src
       - ./nodemon.json:/nodemon.json
+    networks:
+      - we-meet-network
+networks:
+  we-meet-network:
+    external: true
