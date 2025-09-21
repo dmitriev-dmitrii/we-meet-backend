@@ -2,7 +2,7 @@ services:
   we-meet-backend:
     env_file: .env
     container_name: we-meet-backend
-    restart: always
+    restart: unless-stopped
     ports:
       - ${BACKEND_APP_PORT}:${BACKEND_APP_PORT}
     build:
