@@ -9,32 +9,21 @@ const {METERED_API_KEY,
     TURN_USERNAME,
     TURN_PASSWORD,
     TURN_STATIC_AUTH_SECRET,
-    TURN_REALM,
-    TURN_PORT_TCP,
-    TURN_PUBLIC_IP,
-    TURN_PORT_UDP,
-    TURN_PORT_TLS,
+    DOMAIN,
 } = env
-
-const GOOGLE_ICES = [
-    {urls: "stun:stun.l.google.com:19302"}, // Обязательно для Firefox
-    {urls: "stun:stun1.l.google.com:19302"},
-    {urls: "stun:stun2.l.google.com:19302"},
-    {urls: "stun:stun3.l.google.com:19302"}
-]
 
 const iceServers = [
     {
         urls: [
-            `stun:${TURN_PUBLIC_IP}:${TURN_PORT_UDP}`,
-            `stun:${TURN_PUBLIC_IP}:${TURN_PORT_TCP}`
+            `stun:${DOMAIN}:3478`,
+            `stun:${DOMAIN}:3478`
         ]
     },
     {
         urls: [
-            `turn:${TURN_PUBLIC_IP}:${TURN_PORT_UDP}?transport=udp`,
-            `turn:${TURN_PUBLIC_IP}:${TURN_PORT_TCP}?transport=tcp`,
-            `turns:${TURN_PUBLIC_IP}:${TURN_PORT_TLS}?transport=tcp`
+            `turn:${DOMAIN}:3478?transport=udp`,
+            `turn:${DOMAIN}:3478?transport=tcp`,
+            `turns:${DOMAIN}:5349?transport=tcp`
         ],
         username: TURN_USERNAME,
         credential: TURN_PASSWORD
