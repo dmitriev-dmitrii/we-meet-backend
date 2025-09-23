@@ -42,7 +42,7 @@ usersRouter.post('/auth', async ({body = {}, fingerprint}, res) => {
 
 usersRouter.get('/ice-servers', async (req, res) => {
 
-    if (IS_DEV_MODE) {
+    if (req.query['coturn'] === 'true' || IS_DEV_MODE) {
         res.send(iceServers)
         return
     }
@@ -53,7 +53,7 @@ usersRouter.get('/ice-servers', async (req, res) => {
         const metredIceServers = await metredApiRes.json();
         res.send([...iceServers,...metredIceServers, ...freeIce()])
     } catch (e) {
-
+        res.send(freeIce())
     }
 
 })

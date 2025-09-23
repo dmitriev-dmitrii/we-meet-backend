@@ -4,7 +4,7 @@ services:
     container_name: we-meet-backend
     restart: unless-stopped
     ports:
-      - ${BACKEND_APP_PORT}:${BACKEND_APP_PORT}
+      - 3000:3000
     build:
       context: ./
     volumes:

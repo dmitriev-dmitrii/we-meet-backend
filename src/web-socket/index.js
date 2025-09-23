@@ -20,6 +20,7 @@ async function onSocketConnect(ws, {url, headers}) {
     if (!ws._user || !ws._meetId) {
         ws.close(3000)
     }
+    console.log(`WS ${ws._userId} -  user connected`)
 
     const meetUsers = []
     for (const item of Array.from(this.webSocketServer.clients)) {
