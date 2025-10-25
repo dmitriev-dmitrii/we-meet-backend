@@ -7,8 +7,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "nodemon app.js MODE=dev",
-    "start": "node app.js"
+    "dev": "nodemon src/app.js MODE=dev",
+    "start": "node src/app.js"
   },
   "dependencies": {
     "cookie-parser": "1.4.7",

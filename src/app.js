@@ -1,15 +1,15 @@
-import {env} from "./src/constatnts/env.js";
+import {env} from "./constatnts/env.js";
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
-import {setupRoutes} from "./src/routes/index.js";
-import {setupWebSocket} from "./src/web-socket/index.js";
+import {setupRoutes} from "./routes/index.js";
+import {setupWebSocket} from "./web-socket/index.js";
 import cors from 'cors'
 import cookieParser from "cookie-parser";
 import Fingerprint from "express-fingerprint";
 
 import morgan  from  'morgan';
-import {errorMiddleware} from "./src/midlwares/errorMiddlware.js";
+import {errorMiddleware} from "./midlwares/errorMiddlware.js";
 
 const { IS_DEV_MODE } = env
 
