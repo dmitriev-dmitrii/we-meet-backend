@@ -51,7 +51,7 @@ usersRouter.get('/ice-servers', async (req, res) => {
         const metredApiRes = await fetch(`https://we_meet.metered.live/api/v1/turn/credentials?apiKey=${METERED_API_KEY}`)
 
         const metredIceServers = await metredApiRes.json();
-        res.send([...iceServers,...metredIceServers, ...freeIce()])
+        res.send([...metredIceServers, ...freeIce()])
     } catch (e) {
         res.send(freeIce())
     }
