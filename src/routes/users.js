@@ -8,11 +8,10 @@ const {METERED_API_KEY,
     IS_DEV_MODE,
     TURN_USERNAME,
     TURN_PASSWORD,
-    TURN_STATIC_AUTH_SECRET,
     DOMAIN,
 } = env
 
-const iceServers = [
+const infraIceServers = [
     {
         urls: [
             `stun:${DOMAIN}:3478`,
@@ -42,16 +41,24 @@ usersRouter.post('/auth', async ({body = {}, fingerprint}, res) => {
 
 usersRouter.get('/ice-servers', async (req, res) => {
 
-    if (req.query['coturn'] === 'true' || IS_DEV_MODE) {
-        res.send(iceServers)
+    if (req.query['coturn'] === 'true') {
+        res.send(infraIceServers)
         return
     }
+
+    const freeIces =  freeIce()
+
+    if (IS_DEV_MODE) {
+        res.send(freeIces)
+      return
+    }
+
 
     try {
         const metredApiRes = await fetch(`https://we_meet.metered.live/api/v1/turn/credentials?apiKey=${METERED_API_KEY}`)
 
-        const metredIceServers = await metredApiRes.json();
-        res.send([...metredIceServers, ...freeIce()])
+        const metredinfraIceServers = await metredApiRes.json();
+        res.send([...metredinfraIceServers, ...freeIces])
     } catch (e) {
         res.send(freeIce())
     }
